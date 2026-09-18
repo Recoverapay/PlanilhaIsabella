@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carteira Consórcio — Vendas &amp; Comissões</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg: #F2F4F2;
+  --bg-elevated: #FFFFFF;
+  --ink: #0E2624;
+  --ink-soft: #3E5652;
+  --ink-faint: #7C8F8C;
+  --line: #DCE3E0;
+  --line-soft: #EAEEEC;
+  --brand: #0F6157;
+  --brand-ink: #0A4842;
+  --brand-tint: #E3EFEC;
+  --gold: #A6791F;
+  --gold-tint: #F6EEDC;
+  --green: #1E8E6B;
+  --green-tint: #E4F3ED;
+  --red: #B3261E;
+  --red-tint: #FBEAE9;
+  --shadow: 0 1px 2px rgba(14,38,36,.06), 0 4px 16px rgba(14,38,36,.05);
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-sans: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg: #0E1614;
+    --bg-elevated: #16211F;
+    --ink: #E8EDEB;
+    --ink-soft: #B6C4C0;
+    --ink-faint: #7C918C;
+    --line: #263532;
+    --line-soft: #1E2B28;
+    --brand: #2FB595;
+    --brand-ink: #7BD9C0;
+    --brand-tint: #17332C;
+    --gold: #E3B95C;
+    --gold-tint: #332A16;
+    --green: #3FBF97;
+    --green-tint: #16302A;
+    --red: #E38079;
+    --red-tint: #34201F;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg: #0E1614;
+  --bg-elevated: #16211F;
+  --ink: #E8EDEB;
+  --ink-soft: #B6C4C0;
+  --ink-faint: #7C918C;
+  --line: #263532;
+  --line-soft: #1E2B28;
+  --brand: #2FB595;
+  --brand-ink: #7BD9C0;
+  --brand-tint: #17332C;
+  --gold: #E3B95C;
+  --gold-tint: #332A16;
+  --green: #3FBF97;
+  --green-tint: #16302A;
+  --red: #E38079;
+  --red-tint: #34201F;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:15.5px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--brand-tint);color:var(--brand-ink);}
+button{font-family:inherit;}
+input,select{font-family:inherit;}
+.num{font-variant-numeric:tabular-nums;}
+
+/* ---------- layout ---------- */
+#app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:238px;
+  flex:0 0 238px;
+  background:var(--bg-elevated);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:22px 16px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:4px 6px 22px 6px;
+  border-bottom:1px solid var(--line-soft);
+  margin-bottom:18px;
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(155deg,var(--brand),var(--brand-ink));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-family:var(--font-serif);font-weight:700;font-size:18px;
+  flex:none;
+}
+.brand-text{display:flex;flex-direction:column;line-height:1.2;}
+.brand-text strong{font-family:var(--font-serif);font-size:17.5px;font-weight:600;}
+.brand-text span{font-size:12.5px;color:var(--ink-faint);}
+
+nav.mainnav{display:flex;flex-direction:column;gap:2px;}
+.navlink{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--radius-s);
+  color:var(--ink-soft);text-decoration:none;font-size:14.5px;font-weight:500;
+  cursor:pointer;border:none;background:none;width:100%;text-align:left;
+}
+.navlink:hover{background:var(--line-soft);color:var(--ink);}
+.navlink.active{background:var(--brand-tint);color:var(--brand-ink);font-weight:600;}
+.navlink svg{flex:none;opacity:.85;}
+.nav-count{
+  margin-left:auto;font-size:12px;color:var(--ink-faint);
+  background:var(--line-soft);border-radius:20px;padding:1px 7px;
+  font-variant-numeric:tabular-nums;
+}
+.navlink.active .nav-count{background:rgba(255,255,255,.55);color:var(--brand-ink);}
+
+.sidebar-foot{
+  margin-top:auto;padding-top:16px;border-top:1px solid var(--line-soft);
+  font-size:12.5px;color:var(--ink-faint);
+}
+.sync-badge{display:flex;align-items:center;gap:7px;cursor:default;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--ink-faint);flex:none;}
+.sync-dot-on{background:var(--green);box-shadow:0 0 0 3px var(--green-tint);}
+.sync-dot-off{background:var(--gold);box-shadow:0 0 0 3px var(--gold-tint);}
+.sidebar-foot button{
+  display:flex;align-items:center;gap:7px;width:100%;
+  background:none;border:1px dashed var(--line);border-radius:var(--radius-s);
+  color:var(--ink-faint);padding:8px 10px;font-size:13px;cursor:pointer;margin-top:8px;
+}
+.sidebar-foot button:hover{border-color:var(--red);color:var(--red);}
+
+.main{flex:1;min-width:0;padding:26px 34px 60px;}
+.topbar{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:20px;margin-bottom:26px;flex-wrap:wrap;
+}
+.topbar h1{
+  font-family:var(--font-serif);font-weight:600;font-size:29px;margin:0 0 4px;
+  letter-spacing:-.01em;
+}
+.topbar p{margin:0;color:var(--ink-faint);font-size:14.5px;max-width:60ch;}
+.topbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+
+.taxctrl{
+  display:flex;align-items:center;gap:8px;background:var(--bg-elevated);
+  border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 10px;
+}
+.taxctrl label{font-size:12.5px;color:var(--ink-faint);white-space:nowrap;}
+.taxctrl input{
+  width:54px;border:none;background:none;color:var(--ink);font-weight:600;
+  font-size:14.5px;text-align:right;outline:none;
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  border-radius:var(--radius-s);border:1px solid transparent;
+  padding:10px 16px;font-size:14.5px;font-weight:600;cursor:pointer;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--brand);color:#fff;}
+.btn-primary:hover{background:var(--brand-ink);}
+.btn-ghost{background:var(--bg-elevated);color:var(--ink-soft);border-color:var(--line);}
+.btn-ghost:hover{border-color:var(--ink-faint);color:var(--ink);}
+.btn-sm{padding:7px 11px;font-size:13.5px;}
+.btn-icon{padding:7px;border-radius:var(--radius-s);background:none;border:1px solid transparent;color:var(--ink-faint);cursor:pointer;}
+.btn-icon:hover{background:var(--line-soft);color:var(--ink);}
+
+.view{display:none;}
+.view.active{display:block;}
+
+/* ---------- KPI cards ---------- */
+.kpi-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;
+}
+.kpi-card{
+  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-m);
+  padding:18px 18px 16px;box-shadow:var(--shadow);
+}
+.kpi-label{font-size:12.5px;color:var(--ink-faint);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.kpi-value{font-family:var(--font-serif);font-size:27px;font-weight:600;letter-spacing:-.01em;}
+.kpi-sub{font-size:12.5px;color:var(--ink-faint);margin-top:4px;}
+.kpi-card.accent{background:linear-gradient(160deg,var(--brand-tint),var(--bg-elevated));border-color:var(--brand);}
+.kpi-card.accent .kpi-value{color:var(--brand-ink);}
+
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;align-items:start;}
+
+.panel{
+  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-m);
+  box-shadow:var(--shadow);
+}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--line-soft);
+}
+.panel-head h2{font-family:var(--font-serif);font-size:18px;font-weight:600;margin:0;}
+.panel-head p{margin:3px 0 0;font-size:13px;color:var(--ink-faint);}
+.panel-body{padding:16px 18px 18px;}
+
+.future-list{display:flex;flex-direction:column;gap:0;}
+.future-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid var(--line-soft);gap:10px;
+}
+.future-row:last-child{border-bottom:none;}
+.future-who{display:flex;flex-direction:column;min-width:0;}
+.future-who strong{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.future-who span{font-size:12.5px;color:var(--ink-faint);}
+.future-amt{font-weight:600;font-size:14.5px;white-space:nowrap;}
+.future-empty{color:var(--ink-faint);font-size:13.5px;padding:6px 0;}
+
+.buckets{display:flex;gap:8px;margin-bottom:6px;}
+.bucket{
+  flex:1;text-align:center;background:var(--line-soft);border-radius:var(--radius-s);
+  padding:10px 6px;
+}
+.bucket b{display:block;font-size:16.5px;font-family:var(--font-serif);}
+.bucket span{font-size:11.5px;color:var(--ink-faint);}
+
+/* ---------- tables ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.search{
+  display:flex;align-items:center;gap:7px;background:var(--bg-elevated);
+  border:1px solid var(--line);border-radius:var(--radius-s);padding:8px 12px;flex:1;min-width:180px;max-width:320px;
+}
+.search input{border:none;background:none;outline:none;color:var(--ink);font-size:14.5px;width:100%;}
+.search svg{flex:none;color:var(--ink-faint);}
+.select{
+  border:1px solid var(--line);background:var(--bg-elevated);color:var(--ink);
+  border-radius:var(--radius-s);padding:8px 10px;font-size:14.5px;outline:none;
+}
+
+.table-wrap{
+  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-m);
+  overflow:hidden;box-shadow:var(--shadow);
+}
+.table-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:760px;}
+thead th{
+  text-align:left;font-size:12.5px;color:var(--ink-faint);font-weight:600;
+  padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+  background:var(--line-soft);position:sticky;top:0;
+}
+tbody td{padding:12.5px 14px;border-bottom:1px solid var(--line-soft);white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--line-soft);}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
+td.wrap{white-space:normal;}
+
+.badge{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;
+  font-size:12.5px;font-weight:600;
+}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+.badge-green{background:var(--green-tint);color:var(--green);}
+.badge-gold{background:var(--gold-tint);color:var(--gold);}
+.badge-red{background:var(--red-tint);color:var(--red);}
+.badge-muted{background:var(--line-soft);color:var(--ink-faint);}
+
+.rowactions{display:flex;gap:4px;justify-content:flex-end;}
+
+.empty-state{
+  text-align:center;padding:56px 20px;color:var(--ink-faint);
+}
+.empty-state h3{font-family:var(--font-serif);color:var(--ink);font-size:19px;margin:10px 0 4px;font-weight:600;}
+.empty-state p{font-size:14.5px;max-width:42ch;margin:0 auto;}
+
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--ink-faint);}
+.pagination .pg-btns{display:flex;gap:6px;}
+.pagination button{background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-s);padding:5px 10px;cursor:pointer;color:var(--ink-soft);}
+.pagination button:disabled{opacity:.4;cursor:default;}
+
+/* ---------- modal ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(10,20,18,.45);backdrop-filter:blur(2px);
+  display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--bg-elevated);border-radius:var(--radius-l);width:100%;max-width:640px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--line);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line-soft);}
+.modal-head h2{font-family:var(--font-serif);font-size:20px;margin:0;font-weight:600;}
+.modal-body{padding:22px 24px;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--line-soft);}
+
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field.span2{grid-column:span 2;}
+.field label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+.field input,.field select{
+  border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 12px;
+  font-size:14.5px;background:var(--bg);color:var(--ink);outline:none;
+}
+.field input:focus,.field select:focus{border-color:var(--brand);}
+.field .hint{font-size:12px;color:var(--ink-faint);}
+.preview-box{
+  grid-column:span 2;background:var(--brand-tint);border-radius:var(--radius-s);
+  padding:12px 14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;
+  font-size:13.5px;
+}
+.preview-box div strong{display:block;font-family:var(--font-serif);font-size:16.5px;color:var(--brand-ink);}
+
+/* toast */
+#toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:30px;font-size:14px;
+  font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;z-index:100;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media (max-width:880px){
+  .sidebar{position:fixed;left:-260px;z-index:60;transition:left .2s ease;box-shadow:0 0 0 2000px rgba(0,0,0,0);}
+  .sidebar.open{left:0;box-shadow:0 0 40px rgba(0,0,0,.3);}
+  .main{padding:18px 16px 60px;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  .grid-2{grid-template-columns:1fr;}
+  .formgrid{grid-template-columns:1fr;}
+  .field.span2{grid-column:span 1;}
+  .preview-box{grid-column:span 1;}
+  .topbar h1{font-size:24px;}
+  .menu-toggle{display:inline-flex !important;}
+}
+.menu-toggle{display:none;background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-s);padding:8px;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);margin-right:10px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div class="brand-text">
+        <strong>Carteira Consórcio</strong>
+        <span>Vendas &amp; comissões</span>
+      </div>
+    </div>
+    <nav class="mainnav">
+      <button class="navlink active" data-view="dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Painel
+      </button>
+      <button class="navlink" data-view="vendas">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
+        Vendas
+        <span class="nav-count" id="nav-count-vendas">0</span>
+      </button>
+      <button class="navlink" data-view="recebimentos">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Recebimentos
+        <span class="nav-count" id="nav-count-receb">0</span>
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <div id="sync-badge" class="sync-badge"><span class="sync-dot"></span> Carregando…</div>
+      <button id="btn-clear-all">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+        Apagar todos os dados
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view active" id="view-dashboard">
+      <div class="topbar">
+        <div style="display:flex;">
+          <button class="menu-toggle" id="menu-toggle-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div>
+            <h1>Painel geral</h1>
+            <p>Visão consolidada da carteira: vendas, comissões previstas e fluxo de recebimentos.</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="taxctrl">
+            <label for="input-imposto">Imposto sobre comissão</label>
+            <input type="number" id="input-imposto" step="0.1" min="0" max="100" value="6"><span style="color:var(--ink-faint);font-size:14px;">%</span>
+          </div>
+          <button class="btn btn-primary" id="btn-nova-venda-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Nova venda
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Comissão recebida × a receber</h2>
+              <p>Por mês, conforme a data prevista de cada parcela</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <canvas id="chart-mensal" height="230"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Próximos recebimentos</h2>
+              <p>Parcelas em aberto mais próximas</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="buckets" id="buckets"></div>
+            <div class="future-list" id="future-list" style="margin-top:14px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VENDAS ============ -->
+    <section class="view" id="view-vendas">
+      <div class="topbar">
+        <div style="display:flex;">
+          <button class="menu-toggle" id="menu-toggle-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div>
+            <h1>Vendas</h1>
+            <p>Cada venda gera automaticamente seu cronograma de recebimento.</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="btn-nova-venda">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Nova venda
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="vendas-search" placeholder="Buscar cliente, grupo ou cota…">
+        </div>
+        <select class="select" id="vendas-filter-tipo">
+          <option value="">Todos os bens</option>
+          <option value="Imóvel">Imóvel</option>
+          <option value="Veículo">Veículo</option>
+          <option value="Outro">Outro</option>
+        </select>
+        <select class="select" id="vendas-filter-status">
+          <option value="">Todos os status</option>
+          <option value="Em andamento">Em andamento</option>
+          <option value="Concluída">Concluída</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div class="table-wrap" id="vendas-table-wrap"></div>
+    </section>
+
+    <!-- ============ RECEBIMENTOS ============ -->
+    <section class="view" id="view-recebimentos">
+      <div class="topbar">
+        <div style="display:flex;">
+          <button class="menu-toggle" id="menu-toggle-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div>
+            <h1>Recebimentos</h1>
+            <p>Cronograma parcela a parcela de todas as vendas. Marque como recebido quando o valor cair na conta.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="receb-search" placeholder="Buscar cliente, grupo ou cota…">
+        </div>
+        <select class="select" id="receb-filter-status">
+          <option value="">Todos os status</option>
+          <option value="a_receber">A receber</option>
+          <option value="recebido">Recebido</option>
+          <option value="atrasado">Atrasado</option>
+        </select>
+        <select class="select" id="receb-filter-periodo">
+          <option value="">Qualquer período</option>
+          <option value="30">Próximos 30 dias</option>
+          <option value="60">Próximos 60 dias</option>
+          <option value="90">Próximos 90 dias</option>
+        </select>
+      </div>
+
+      <div class="table-wrap" id="receb-table-wrap"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ MODAL: NOVA VENDA ============ -->
+<div class="overlay" id="modal-venda">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-venda-title">Nova venda</h2>
+      <button class="btn-icon" id="modal-venda-close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-venda">
+        <div class="formgrid">
+          <div class="field">
+            <label for="f-data">Data da venda</label>
+            <input type="date" id="f-data" required>
+          </div>
+          <div class="field">
+            <label for="f-cliente">Cliente</label>
+            <input type="text" id="f-cliente" placeholder="Nome do cliente" required>
+          </div>
+          <div class="field">
+            <label for="f-tipo">Tipo de bem</label>
+            <select id="f-tipo">
+              <option>Imóvel</option>
+              <option>Veículo</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-credito">Valor do crédito (R$)</label>
+            <input type="number" id="f-credito" min="0" step="0.01" placeholder="0,00" required>
+          </div>
+          <div class="field">
+            <label for="f-plano">Plano</label>
+            <input type="text" id="f-plano" placeholder="Ex.: 200 meses">
+          </div>
+          <div class="field">
+            <label for="f-parcelas">Quantidade de parcelas</label>
+            <input type="number" id="f-parcelas" min="1" max="240" step="1" placeholder="Ex.: 200" required>
+          </div>
+          <div class="field">
+            <label for="f-grupo">Grupo</label>
+            <input type="text" id="f-grupo" placeholder="Ex.: 1234">
+          </div>
+          <div class="field">
+            <label for="f-cota">Cota</label>
+            <input type="text" id="f-cota" placeholder="Ex.: 056">
+          </div>
+          <div class="field">
+            <label for="f-valorparcela">Valor da parcela (R$)</label>
+            <input type="number" id="f-valorparcela" min="0" step="0.01" placeholder="0,00">
+          </div>
+          <div class="field">
+            <label for="f-status">Status da venda</label>
+            <select id="f-status">
+              <option>Em andamento</option>
+              <option>Concluída</option>
+              <option>Cancelada</option>
+            </select>
+          </div>
+
+          <div class="preview-box" id="f-preview">
+            <div><span class="hint">Comissão total prevista</span><strong id="f-preview-total">R$ 0,00</strong></div>
+            <div><span class="hint">1ª–13ª parcela (cada)</span><strong id="f-preview-p1">R$ 0,00</strong></div>
+            <div><span class="hint">14ª em diante (cada)</span><strong id="f-preview-p14">R$ 0,00</strong></div>
+            <div><span class="hint">Bônus na 15ª (0,3%+0,11%)</span><strong id="f-preview-p15">R$ 0,00</strong></div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="modal-venda-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="modal-venda-save">Salvar venda</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   STORAGE — Supabase (Postgres na nuvem)
+   Preencha SUPABASE_URL e SUPABASE_ANON_KEY abaixo (veja README.md)
+   antes de usar. Sem isso, o app roda só localmente (localStorage).
+============================================================ */
+var SUPABASE_URL = "https://uiwwjudfiyfmivudszyp.supabase.co/rest/v1/";
+var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd3dqdWRmaXlmbWl2dWRzenlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NTk5ODksImV4cCI6MjEwNTMzNTk4OX0.CnHLVagZcYgDqYhxHz8E_XZTKcDMD-YHhObyvzoTe90";
+
+var STORE_KEY = "consorcio_crm_v1";
+var state = { sales: [], receipts: {}, impostoPct: 6 };
+var sb = null;
+var dbReady = false;
+
+function isConfigured(){
+  return SUPABASE_URL.indexOf("COLE_AQUI") === -1 && SUPABASE_ANON_KEY.indexOf("COLE_AQUI") === -1
+    && SUPABASE_URL.length > 10 && SUPABASE_ANON_KEY.length > 10;
+}
+
+function uid(){
+  if(window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+  return 's_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+}
+
+function loadLocal(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      var parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+    }
+  }catch(e){ console.warn("Não foi possível carregar dados salvos.", e); }
+}
+function saveLocal(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch(e){ console.warn("Não foi possível salvar os dados.", e); showToast("Não foi possível salvar (armazenamento indisponível)."); }
+}
+
+/* Carrega tudo do Supabase para dentro de `state` */
+async function loadFromDb(){
+  var settingsRes = await sb.from('settings').select('*').eq('id', 1).maybeSingle();
+  if(settingsRes.error) throw settingsRes.error;
+  if(settingsRes.data && typeof settingsRes.data.imposto_pct === 'number'){
+    state.impostoPct = settingsRes.data.imposto_pct;
+  } else {
+    await sb.from('settings').upsert({id:1, imposto_pct: state.impostoPct});
+  }
+
+  var salesRes = await sb.from('sales').select('*').order('data', {ascending:false});
+  if(salesRes.error) throw salesRes.error;
+  state.sales = (salesRes.data||[]).map(function(r){
+    return {
+      id: r.id, data: r.data, cliente: r.cliente, tipo: r.tipo,
+      valorCredito: Number(r.valor_credito), plano: r.plano||"",
+      qtdParcelas: Number(r.qtd_parcelas), grupo: r.grupo||"", cota: r.cota||"",
+      valorParcela: Number(r.valor_parcela)||0, status: r.status
+    };
+  });
+
+  var ovRes = await sb.from('receipt_overrides').select('*');
+  if(ovRes.error) throw ovRes.error;
+  state.receipts = {};
+  (ovRes.data||[]).forEach(function(r){
+    state.receipts[receiptKey(r.sale_id, r.parcela)] = { status: r.status, dataRecebido: r.data_recebido };
+  });
+}
+
+function setSyncBadge(mode){
+  var el = document.getElementById('sync-badge');
+  if(!el) return;
+  if(mode === 'cloud'){
+    el.innerHTML = '<span class="sync-dot sync-dot-on"></span> Sincronizado (Supabase)';
+    el.title = "Os dados ficam salvos no Supabase. Qualquer pessoa com este link e as credenciais corretas vê os mesmos dados.";
+  } else if(mode === 'local'){
+    el.innerHTML = '<span class="sync-dot sync-dot-off"></span> Salvo só neste navegador';
+    el.title = "O Supabase não foi configurado (ou está indisponível). Os dados ficam guardados apenas neste navegador.";
+  } else {
+    el.innerHTML = '<span class="sync-dot"></span> Carregando…';
+  }
+}
+
+/* Grava uma venda (cria ou atualiza) */
+function persistSale(sale){
+  if(dbReady){
+    var row = {
+      id: sale.id, data: sale.data, cliente: sale.cliente, tipo: sale.tipo,
+      valor_credito: sale.valorCredito, plano: sale.plano, qtd_parcelas: sale.qtdParcelas,
+      grupo: sale.grupo, cota: sale.cota, valor_parcela: sale.valorParcela, status: sale.status
+    };
+    sb.from('sales').upsert(row).then(function(res){
+      if(res.error){ console.warn(res.error); showToast("Não foi possível salvar no Supabase."); }
+    });
+  } else { saveLocal(); }
+}
+function persistDeleteSale(id){
+  if(dbReady){
+    sb.from('sales').delete().eq('id', id).then(function(res){
+      if(res.error) console.warn(res.error);
+    });
+  } else { saveLocal(); }
+}
+/* Grava ou remove UMA parcela específica (mais eficiente que reescrever tudo) */
+function persistReceiptOverride(saleId, parcela, received, dataRecebido){
+  if(dbReady){
+    if(received){
+      sb.from('receipt_overrides').upsert({
+        sale_id: saleId, parcela: parcela, status: 'recebido', data_recebido: dataRecebido
+      }, {onConflict:'sale_id,parcela'}).then(function(res){
+        if(res.error){ console.warn(res.error); showToast("Não foi possível salvar no Supabase."); }
+      });
+    } else {
+      sb.from('receipt_overrides').delete().eq('sale_id', saleId).eq('parcela', parcela).then(function(res){
+        if(res.error) console.warn(res.error);
+      });
+    }
+  } else { saveLocal(); }
+}
+function persistSettings(){
+  if(dbReady){
+    sb.from('settings').upsert({id:1, imposto_pct: state.impostoPct}).then(function(res){
+      if(res.error) console.warn(res.error);
+    });
+  } else { saveLocal(); }
+}
+
+/* ============================================================
+   REGRA DE COMISSÃO
+   1a-13a parcela: total 2% do credito, dividido em 13.
+   14a ate ultima: total 0,7% do credito, dividido igualmente entre as parcelas 14..qtd.
+   15a parcela: soma-se bonificacao 0,3% + seguro 0,11% (valores fixos, nao divididos).
+============================================================ */
+function commissionForInstallment(credito, qtd, p){
+  var out = { tipo:"", pct:0, compartilhada:0, bonificacao:0, seguro:0, bruto:0 };
+  if(p <= 13){
+    out.tipo = "Comissão inicial (2%)";
+    out.pct = 0.02/13;
+    out.bruto = credito * out.pct;
+  } else if(p <= qtd){
+    var base = qtd > 13 ? credito * 0.007/(qtd-13) : 0;
+    out.compartilhada = base;
+    out.pct = qtd > 13 ? 0.007/(qtd-13) : 0;
+    if(p === 15){
+      out.tipo = "Compartilhada + bonificação + seguro";
+      out.bonificacao = credito * 0.003;
+      out.seguro = credito * 0.0011;
+    } else {
+      out.tipo = "Comissão compartilhada (0,7%)";
+    }
+    out.bruto = base + out.bonificacao + out.seguro;
+  }
+  return out;
+}
+function totalCommission(credito, qtd){
+  var total = credito * 0.02;
+  if(qtd > 13) total += credito * 0.007;
+  if(qtd >= 15) total += credito * (0.003 + 0.0011);
+  return total;
+}
+function addMonths(dateStr, n){
+  var d = new Date(dateStr + "T00:00:00");
+  var day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  var last = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+  d.setDate(Math.min(day, last));
+  return d;
+}
+function receiptKey(saleId, p){ return saleId + "_" + p; }
+function getImpostoFrac(){ return (state.impostoPct || 0) / 100; }
+
+/* Generates the full flattened installment list for a sale, applying stored overrides */
+function scheduleForSale(sale){
+  var rows = [];
+  var qtd = sale.qtdParcelas;
+  for(var p=1; p<=qtd; p++){
+    var c = commissionForInstallment(sale.valorCredito, qtd, p);
+    if(c.bruto <= 0 && p > qtd) continue;
+    var dueDate = addMonths(sale.data, p);
+    var key = receiptKey(sale.id, p);
+    var ov = state.receipts[key] || {};
+    var status = ov.status || "a_receber";
+    var imposto = c.bruto * getImpostoFrac();
+    var liquido = c.bruto - imposto;
+    rows.push({
+      saleId: sale.id, cliente: sale.cliente, grupo: sale.grupo, cota: sale.cota,
+      credito: sale.valorCredito, parcela: p, dueDate: dueDate,
+      tipo: c.tipo, pct: c.pct, bruto: c.bruto, imposto: imposto, liquido: liquido,
+      compartilhada: c.compartilhada, bonificacao: c.bonificacao, seguro: c.seguro,
+      status: status, dataRecebido: ov.dataRecebido || null
+    });
+  }
+  return rows;
+}
+function allReceipts(){
+  var out = [];
+  state.sales.forEach(function(s){ out = out.concat(scheduleForSale(s)); });
+  return out;
+}
+
+/* ============================================================
+   FORMAT HELPERS
+============================================================ */
+var fmtBRL = new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'});
+var fmtDate = new Intl.DateTimeFormat('pt-BR');
+var fmtMonth = new Intl.DateTimeFormat('pt-BR', {month:'short', year:'numeric'});
+function money(v){ return fmtBRL.format(v||0); }
+function dateBR(d){ if(!d) return "—"; return fmtDate.format(d instanceof Date ? d : new Date(d+"T00:00:00")); }
+function todayMidnight(){ var t=new Date(); t.setHours(0,0,0,0); return t; }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+var views = ['dashboard','vendas','recebimentos'];
+function setView(name){
+  views.forEach(function(v){
+    document.getElementById('view-'+v).classList.toggle('active', v===name);
+  });
+  document.querySelectorAll('.navlink').forEach(function(el){
+    el.classList.toggle('active', el.dataset.view===name);
+  });
+  document.getElementById('sidebar').classList.remove('open');
+  if(name==='dashboard') renderDashboard();
+  if(name==='vendas') renderVendas();
+  if(name==='recebimentos') renderRecebimentos();
+}
+document.querySelectorAll('.navlink[data-view]').forEach(function(el){
+  el.addEventListener('click', function(){ setView(el.dataset.view); });
+});
+['menu-toggle-1','menu-toggle-2','menu-toggle-3'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener('click', function(){ document.getElementById('sidebar').classList.toggle('open'); });
+});
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+var chartInstance = null;
+
+function renderDashboard(){
+  var sales = state.sales;
+  var receipts = allReceipts();
+
+  var totalVendas = sales.length;
+  var totalCredito = sales.reduce(function(a,s){return a+s.valorCredito;},0);
+  var totalImovel = sales.filter(function(s){return s.tipo==='Imóvel';}).reduce(function(a,s){return a+s.valorCredito;},0);
+  var totalVeiculo = sales.filter(function(s){return s.tipo==='Veículo';}).reduce(function(a,s){return a+s.valorCredito;},0);
+
+  var comissaoBruta = sales.reduce(function(a,s){return a+totalCommission(s.valorCredito, s.qtdParcelas);},0);
+  var comissaoRecebidaBruta = receipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.bruto;},0);
+  var comissaoAReceberBruta = comissaoBruta - comissaoRecebidaBruta;
+  var impostoTotal = receipts.reduce(function(a,r){return a+r.imposto;},0);
+  var liquidaPrevista = comissaoBruta - impostoTotal;
+  var liquidaRecebida = receipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
+  var liquidaAReceber = liquidaPrevista - liquidaRecebida;
+
+  var kpis = [
+    {label:"Vendas cadastradas", value:totalVendas, sub:money(totalCredito)+" em créditos", accent:true, isCount:true},
+    {label:"Créditos em imóveis", value:money(totalImovel), sub:"soma dos créditos vendidos"},
+    {label:"Créditos em veículos", value:money(totalVeiculo), sub:"soma dos créditos vendidos"},
+    {label:"Comissão bruta prevista", value:money(comissaoBruta), sub:"antes do imposto"},
+    {label:"Comissão já recebida", value:money(comissaoRecebidaBruta), sub:"valor bruto"},
+    {label:"Comissão a receber", value:money(comissaoAReceberBruta), sub:"valor bruto"},
+    {label:"Comissão líquida prevista", value:money(liquidaPrevista), sub:"após imposto de "+state.impostoPct+"%"},
+    {label:"Comissão líquida a receber", value:money(liquidaAReceber), sub:money(liquidaRecebida)+" já recebidos líquidos"}
+  ];
+  var grid = document.getElementById('kpi-grid');
+  grid.innerHTML = kpis.map(function(k){
+    return '<div class="kpi-card'+(k.accent?' accent':'')+'">'+
+      '<div class="kpi-label">'+k.label+'</div>'+
+      '<div class="kpi-value num">'+(k.isCount ? k.value : k.value)+'</div>'+
+      '<div class="kpi-sub">'+k.sub+'</div></div>';
+  }).join('');
+
+  // buckets 30/60/90
+  var t0 = todayMidnight();
+  function bucketSum(maxDays){
+    return receipts.filter(function(r){
+      if(r.status!=='a_receber') return false;
+      var d = daysBetween(t0, r.dueDate);
+      return d>=0 && d<=maxDays;
+    }).reduce(function(a,r){return a+r.liquido;},0);
+  }
+  var b30 = bucketSum(30), b60 = bucketSum(60), b90 = bucketSum(90);
+  var totalFuturo = receipts.filter(function(r){return r.status==='a_receber';}).reduce(function(a,r){return a+r.liquido;},0);
+  document.getElementById('buckets').innerHTML =
+    '<div class="bucket"><b>'+money(b30)+'</b><span>30 dias</span></div>'+
+    '<div class="bucket"><b>'+money(b60)+'</b><span>60 dias</span></div>'+
+    '<div class="bucket"><b>'+money(b90)+'</b><span>90 dias</span></div>'+
+    '<div class="bucket"><b>'+money(totalFuturo)+'</b><span>total futuro</span></div>';
+
+  // upcoming list
+  var upcoming = receipts.filter(function(r){return r.status==='a_receber' && daysBetween(t0,r.dueDate)>=0;})
+    .sort(function(a,b){return a.dueDate-b.dueDate;}).slice(0,7);
+  var listEl = document.getElementById('future-list');
+  if(upcoming.length===0){
+    listEl.innerHTML = '<div class="future-empty">Nenhum recebimento futuro em aberto.</div>';
+  } else {
+    listEl.innerHTML = upcoming.map(function(r){
+      return '<div class="future-row"><div class="future-who"><strong>'+escapeHtml(r.cliente)+'</strong>'+
+        '<span>Parcela '+r.parcela+' · '+dateBR(r.dueDate)+'</span></div>'+
+        '<div class="future-amt num">'+money(r.liquido)+'</div></div>';
+    }).join('');
+  }
+
+  // monthly chart data: group by month of dueDate, split recebido/a_receber (liquido)
+  var monthMap = {};
+  receipts.forEach(function(r){
+    var key = r.dueDate.getFullYear()+"-"+String(r.dueDate.getMonth()+1).padStart(2,'0');
+    if(!monthMap[key]) monthMap[key] = {recebido:0, aReceber:0, sort:new Date(r.dueDate.getFullYear(), r.dueDate.getMonth(), 1)};
+    if(r.status==='recebido') monthMap[key].recebido += r.liquido;
+    else monthMap[key].aReceber += r.liquido;
+  });
+  var months = Object.keys(monthMap).map(function(k){return monthMap[k];});
+  months.sort(function(a,b){return a.sort-b.sort;});
+  // limit to a reasonable rolling window: from earliest month with data to +18 months ahead of today, max 24 bars
+  var labels = [], recebidoData = [], aReceberData = [];
+  months.forEach(function(m){
+    labels.push(fmtMonth.format(m.sort));
+    recebidoData.push(Math.round(m.recebido*100)/100);
+    aReceberData.push(Math.round(m.aReceber*100)/100);
+  });
+  if(labels.length>36){
+    // keep most relevant window centered on today
+    labels = labels.slice(0,36); recebidoData = recebidoData.slice(0,36); aReceberData = aReceberData.slice(0,36);
+  }
+
+  var css = getComputedStyle(document.documentElement);
+  var greenColor = css.getPropertyValue('--green').trim();
+  var goldColor = css.getPropertyValue('--gold').trim();
+  var inkColor = css.getPropertyValue('--ink-soft').trim();
+  var lineColor = css.getPropertyValue('--line').trim();
+
+  var ctx = document.getElementById('chart-mensal').getContext('2d');
+  if(chartInstance) chartInstance.destroy();
+  if(labels.length===0){
+    chartInstance = null;
+    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+  } else {
+    chartInstance = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:labels, datasets:[
+        {label:'Recebida', data:recebidoData, backgroundColor:greenColor, borderRadius:3, maxBarThickness:22},
+        {label:'A receber', data:aReceberData, backgroundColor:goldColor, borderRadius:3, maxBarThickness:22}
+      ]},
+      options:{
+        responsive:true,
+        plugins:{ legend:{labels:{color:inkColor, font:{family:"IBM Plex Sans", size:11}}} },
+        scales:{
+          x:{ ticks:{color:inkColor, font:{size:10.5}}, grid:{display:false} },
+          y:{ ticks:{color:inkColor, font:{size:10.5}, callback:function(v){return 'R$ '+(v/1000).toLocaleString('pt-BR')+'k';}}, grid:{color:lineColor} }
+        }
+      }
+    });
+  }
+
+  document.getElementById('nav-count-vendas').textContent = sales.length;
+  document.getElementById('nav-count-receb').textContent = receipts.filter(function(r){return r.status==='a_receber';}).length;
+}
+
+function escapeHtml(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* ============================================================
+   VENDAS TABLE
+============================================================ */
+function renderVendas(){
+  var search = (document.getElementById('vendas-search').value||"").toLowerCase();
+  var fTipo = document.getElementById('vendas-filter-tipo').value;
+  var fStatus = document.getElementById('vendas-filter-status').value;
+
+  var rows = state.sales.filter(function(s){
+    if(fTipo && s.tipo!==fTipo) return false;
+    if(fStatus && s.status!==fStatus) return false;
+    if(search){
+      var hay = (s.cliente+" "+s.grupo+" "+s.cota).toLowerCase();
+      if(hay.indexOf(search)===-1) return false;
+    }
+    return true;
+  }).sort(function(a,b){ return b.id - a.id; });
+
+  var wrap = document.getElementById('vendas-table-wrap');
+  if(state.sales.length===0){
+    wrap.innerHTML = emptyState("Nenhuma venda cadastrada", "Clique em “Nova venda” para começar a cadastrar sua carteira de consórcios.");
+    return;
+  }
+  if(rows.length===0){
+    wrap.innerHTML = emptyState("Nada encontrado", "Ajuste a busca ou os filtros para ver suas vendas.");
+    return;
+  }
+
+  var receiptsBySale = {};
+  rows.forEach(function(s){ receiptsBySale[s.id] = scheduleForSale(s); });
+
+  var thead = '<thead><tr>'+
+    '<th>Nº</th><th>Data</th><th>Cliente</th><th>Bem</th><th class="num">Crédito</th>'+
+    '<th class="num">Parcelas</th><th class="num">Comissão prevista</th><th class="num">Recebida</th>'+
+    '<th class="num">A receber</th><th>Status</th><th></th></tr></thead>';
+
+  var body = rows.map(function(s, idx){
+    var rec = receiptsBySale[s.id];
+    var total = totalCommission(s.valorCredito, s.qtdParcelas);
+    var recebida = rec.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.bruto;},0);
+    var aReceber = total - recebida;
+    return '<tr>'+
+      '<td class="num">'+(rows.length-idx)+'</td>'+
+      '<td>'+dateBR(s.data)+'</td>'+
+      '<td class="wrap">'+escapeHtml(s.cliente)+'</td>'+
+      '<td>'+escapeHtml(s.tipo)+'</td>'+
+      '<td class="num">'+money(s.valorCredito)+'</td>'+
+      '<td class="num">'+s.qtdParcelas+'</td>'+
+      '<td class="num">'+money(total)+'</td>'+
+      '<td class="num">'+money(recebida)+'</td>'+
+      '<td class="num">'+money(aReceber)+'</td>'+
+      '<td>'+statusBadge(s.status)+'</td>'+
+      '<td><div class="rowactions">'+
+        '<button class="btn-icon" data-edit="'+s.id+'" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'+
+        '<button class="btn-icon" data-del="'+s.id+'" title="Excluir"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button>'+
+      '</div></td></tr>';
+  }).join('');
+
+  wrap.innerHTML = '<div class="table-scroll"><table>'+thead+'<tbody>'+body+'</tbody></table></div>';
+
+  wrap.querySelectorAll('[data-edit]').forEach(function(b){
+    b.addEventListener('click', function(){ openVendaModal(b.dataset.edit); });
+  });
+  wrap.querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click', function(){ deleteSale(b.dataset.del); });
+  });
+}
+function statusBadge(status){
+  if(status==='Concluída') return '<span class="badge badge-green">Concluída</span>';
+  if(status==='Cancelada') return '<span class="badge badge-red">Cancelada</span>';
+  return '<span class="badge badge-gold">Em andamento</span>';
+}
+function emptyState(title, msg){
+  return '<div class="empty-state"><h3>'+title+'</h3><p>'+msg+'</p></div>';
+}
+
+['vendas-search','vendas-filter-tipo','vendas-filter-status'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', renderVendas);
+  document.getElementById(id).addEventListener('change', renderVendas);
+});
+
+function deleteSale(id){
+  if(!confirm("Excluir esta venda e todo o seu cronograma de recebimento?")) return;
+  state.sales = state.sales.filter(function(s){return s.id!==id;});
+  Object.keys(state.receipts).forEach(function(k){
+    if(k.indexOf(id+"_")===0) delete state.receipts[k];
+  });
+  persistDeleteSale(id); // ON DELETE CASCADE remove as parcelas relacionadas no Supabase
+  renderVendas(); renderDashboard(); renderRecebimentos();
+  showToast("Venda excluída.");
+}
+
+/* ============================================================
+   RECEBIMENTOS TABLE (paginated)
+============================================================ */
+var rPage = 1, rPageSize = 40;
+function renderRecebimentos(){
+  var search = (document.getElementById('receb-search').value||"").toLowerCase();
+  var fStatus = document.getElementById('receb-filter-status').value;
+  var fPeriodo = document.getElementById('receb-filter-periodo').value;
+  var t0 = todayMidnight();
+
+  var all = allReceipts().map(function(r){
+    var effStatus = r.status;
+    if(effStatus==='a_receber' && daysBetween(t0, r.dueDate) < 0) effStatus = 'atrasado';
+    return Object.assign({}, r, {effStatus:effStatus});
+  });
+
+  var rows = all.filter(function(r){
+    if(fStatus && r.effStatus!==fStatus) return false;
+    if(fPeriodo){
+      var d = daysBetween(t0, r.dueDate);
+      if(!(d>=0 && d<=Number(fPeriodo))) return false;
+    }
+    if(search){
+      var hay = (r.cliente+" "+r.grupo+" "+r.cota).toLowerCase();
+      if(hay.indexOf(search)===-1) return false;
+    }
+    return true;
+  }).sort(function(a,b){ return a.dueDate - b.dueDate; });
+
+  var wrap = document.getElementById('receb-table-wrap');
+  if(state.sales.length===0){
+    wrap.innerHTML = emptyState("Nenhum recebimento ainda", "Cadastre uma venda para gerar o cronograma automaticamente.");
+    return;
+  }
+  if(rows.length===0){
+    wrap.innerHTML = emptyState("Nada encontrado", "Ajuste a busca ou os filtros para ver os recebimentos.");
+    return;
+  }
+
+  var totalPages = Math.max(1, Math.ceil(rows.length / rPageSize));
+  if(rPage>totalPages) rPage = totalPages;
+  var pageRows = rows.slice((rPage-1)*rPageSize, rPage*rPageSize);
+
+  var thead = '<thead><tr>'+
+    '<th>Cliente</th><th>Grupo/Cota</th><th class="num">Parcela</th><th>Data prevista</th>'+
+    '<th>Tipo</th><th class="num">Bruto</th><th class="num">Imposto</th><th class="num">Líquido</th>'+
+    '<th>Status</th><th></th></tr></thead>';
+
+  var body = pageRows.map(function(r){
+    var badge = r.effStatus==='recebido' ? '<span class="badge badge-green">Recebido</span>'
+      : r.effStatus==='atrasado' ? '<span class="badge badge-red">Atrasado</span>'
+      : '<span class="badge badge-gold">A receber</span>';
+    var action = r.status==='recebido'
+      ? '<button class="btn btn-ghost btn-sm" data-unreceive="'+r.saleId+'_'+r.parcela+'">Desfazer</button>'
+      : '<button class="btn btn-ghost btn-sm" data-receive="'+r.saleId+'_'+r.parcela+'">Marcar recebido</button>';
+    return '<tr>'+
+      '<td class="wrap">'+escapeHtml(r.cliente)+'</td>'+
+      '<td>'+escapeHtml(r.grupo||'—')+' / '+escapeHtml(r.cota||'—')+'</td>'+
+      '<td class="num">'+r.parcela+'</td>'+
+      '<td>'+dateBR(r.dueDate)+'</td>'+
+      '<td class="wrap">'+r.tipo+'</td>'+
+      '<td class="num">'+money(r.bruto)+'</td>'+
+      '<td class="num">'+money(r.imposto)+'</td>'+
+      '<td class="num">'+money(r.liquido)+'</td>'+
+      '<td>'+badge+(r.dataRecebido? '<div style="font-size:12px;color:var(--ink-faint);margin-top:3px;">'+dateBR(r.dataRecebido)+'</div>':'')+'</td>'+
+      '<td>'+action+'</td>'+
+      '</tr>';
+  }).join('');
+
+  var pag = '<div class="pagination"><span>'+rows.length+' recebimento(s) · página '+rPage+' de '+totalPages+'</span>'+
+    '<div class="pg-btns"><button id="rp-prev" '+(rPage<=1?'disabled':'')+'>Anterior</button>'+
+    '<button id="rp-next" '+(rPage>=totalPages?'disabled':'')+'>Próxima</button></div></div>';
+
+  wrap.innerHTML = '<div class="table-scroll"><table>'+thead+'<tbody>'+body+'</tbody></table></div>'+pag;
+
+  wrap.querySelectorAll('[data-receive]').forEach(function(b){
+    b.addEventListener('click', function(){ setReceived(b.dataset.receive, true); });
+  });
+  wrap.querySelectorAll('[data-unreceive]').forEach(function(b){
+    b.addEventListener('click', function(){ setReceived(b.dataset.unreceive, false); });
+  });
+  var prevBtn = document.getElementById('rp-prev'), nextBtn = document.getElementById('rp-next');
+  if(prevBtn) prevBtn.addEventListener('click', function(){ rPage--; renderRecebimentos(); });
+  if(nextBtn) nextBtn.addEventListener('click', function(){ rPage++; renderRecebimentos(); });
+}
+function setReceived(key, received){
+  if(!state.receipts[key]) state.receipts[key] = {};
+  var sep = key.lastIndexOf('_');
+  var saleId = key.slice(0, sep);
+  var parcela = Number(key.slice(sep+1));
+  var dataRecebido = null;
+  if(received){
+    dataRecebido = new Date().toISOString().slice(0,10);
+    state.receipts[key].status = 'recebido';
+    state.receipts[key].dataRecebido = dataRecebido;
+  } else {
+    delete state.receipts[key];
+  }
+  persistReceiptOverride(saleId, parcela, received, dataRecebido);
+  renderRecebimentos(); renderDashboard(); renderVendas();
+  showToast(received ? "Recebimento marcado." : "Recebimento desfeito.");
+}
+['receb-search','receb-filter-status','receb-filter-periodo'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', function(){ rPage=1; renderRecebimentos(); });
+  document.getElementById(id).addEventListener('change', function(){ rPage=1; renderRecebimentos(); });
+});
+
+/* ============================================================
+   MODAL: NOVA / EDITAR VENDA
+============================================================ */
+var editingId = null;
+var modalEl = document.getElementById('modal-venda');
+function openVendaModal(id){
+  editingId = id || null;
+  document.getElementById('modal-venda-title').textContent = id ? "Editar venda" : "Nova venda";
+  if(id){
+    var s = state.sales.find(function(x){return x.id===id;});
+    document.getElementById('f-data').value = s.data;
+    document.getElementById('f-cliente').value = s.cliente;
+    document.getElementById('f-tipo').value = s.tipo;
+    document.getElementById('f-credito').value = s.valorCredito;
+    document.getElementById('f-plano').value = s.plano||"";
+    document.getElementById('f-parcelas').value = s.qtdParcelas;
+    document.getElementById('f-grupo').value = s.grupo||"";
+    document.getElementById('f-cota').value = s.cota||"";
+    document.getElementById('f-valorparcela').value = s.valorParcela||"";
+    document.getElementById('f-status').value = s.status;
+  } else {
+    document.getElementById('form-venda').reset();
+    document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
+  }
+  updatePreview();
+  modalEl.classList.add('open');
+}
+function closeVendaModal(){ modalEl.classList.remove('open'); editingId = null; }
+document.getElementById('btn-nova-venda').addEventListener('click', function(){ openVendaModal(null); });
+document.getElementById('btn-nova-venda-top').addEventListener('click', function(){ openVendaModal(null); });
+document.getElementById('modal-venda-close').addEventListener('click', closeVendaModal);
+document.getElementById('modal-venda-cancel').addEventListener('click', closeVendaModal);
+modalEl.addEventListener('click', function(e){ if(e.target===modalEl) closeVendaModal(); });
+
+function updatePreview(){
+  var credito = Number(document.getElementById('f-credito').value)||0;
+  var qtd = Number(document.getElementById('f-parcelas').value)||0;
+  var total = totalCommission(credito, qtd);
+  var p1 = credito*0.02/13;
+  var p14 = qtd>13 ? credito*0.007/(qtd-13) : 0;
+  var p15bonus = qtd>=15 ? credito*(0.003+0.0011) : 0;
+  document.getElementById('f-preview-total').textContent = money(total);
+  document.getElementById('f-preview-p1').textContent = money(p1);
+  document.getElementById('f-preview-p14').textContent = money(p14);
+  document.getElementById('f-preview-p15').textContent = money(p15bonus);
+}
+['f-credito','f-parcelas'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+
+document.getElementById('modal-venda-save').addEventListener('click', function(){
+  var data = document.getElementById('f-data').value;
+  var cliente = document.getElementById('f-cliente').value.trim();
+  var credito = Number(document.getElementById('f-credito').value);
+  var qtd = Number(document.getElementById('f-parcelas').value);
+  if(!data || !cliente || !credito || !qtd){
+    showToast("Preencha data, cliente, crédito e parcelas.");
+    return;
+  }
+  var payload = {
+    data: data, cliente: cliente,
+    tipo: document.getElementById('f-tipo').value,
+    valorCredito: credito,
+    plano: document.getElementById('f-plano').value.trim(),
+    qtdParcelas: qtd,
+    grupo: document.getElementById('f-grupo').value.trim(),
+    cota: document.getElementById('f-cota').value.trim(),
+    valorParcela: Number(document.getElementById('f-valorparcela').value)||0,
+    status: document.getElementById('f-status').value
+  };
+  if(editingId){
+    var idx = state.sales.findIndex(function(s){return s.id===editingId;});
+    state.sales[idx] = Object.assign(state.sales[idx], payload);
+    persistSale(state.sales[idx]);
+    showToast("Venda atualizada.");
+  } else {
+    payload.id = uid();
+    state.sales.push(payload);
+    persistSale(payload);
+    showToast("Venda cadastrada.");
+  }
+  closeVendaModal();
+  renderVendas(); renderDashboard(); renderRecebimentos();
+});
+
+/* ============================================================
+   IMPOSTO GLOBAL
+============================================================ */
+var impostoInput = document.getElementById('input-imposto');
+impostoInput.addEventListener('change', function(){
+  var v = Number(impostoInput.value);
+  if(isNaN(v) || v<0) v = 0;
+  state.impostoPct = v;
+  persistSettings();
+  renderDashboard(); renderRecebimentos(); renderVendas();
+});
+
+/* ============================================================
+   LIMPAR TUDO
+============================================================ */
+document.getElementById('btn-clear-all').addEventListener('click', function(){
+  if(!confirm("Isso vai apagar todas as vendas e recebimentos salvos. Continuar?")) return;
+  var oldSales = state.sales;
+  state = { sales: [], receipts: {}, impostoPct: state.impostoPct };
+  if(dbReady){
+    oldSales.forEach(function(s){
+      sb.from('sales').delete().eq('id', s.id).then(function(res){ if(res.error) console.warn(res.error); });
+    });
+  } else {
+    saveLocal();
+  }
+  renderDashboard(); renderVendas(); renderRecebimentos();
+  showToast("Todos os dados foram apagados.");
+});
+
+/* ============================================================
+   SEED (only if nothing saved yet) — demonstrates and validates the rule
+============================================================ */
+function seedIfEmpty(){
+  if(state.sales.length>0) return;
+  var s1 = {
+    id: uid(), data:"2026-01-15", cliente:"Cliente exemplo (validação)", tipo:"Imóvel",
+    valorCredito:4000000, plano:"200 meses", qtdParcelas:200, grupo:"1234", cota:"056",
+    valorParcela:20000, status:"Em andamento"
+  };
+  var s2 = {
+    id: uid(), data:"2026-03-01", cliente:"João da Silva", tipo:"Veículo",
+    valorCredito:100000, plano:"60 meses", qtdParcelas:60, grupo:"5678", cota:"012",
+    valorParcela:1800, status:"Em andamento"
+  };
+  state.sales.push(s1, s2);
+  state.receipts[receiptKey(s1.id,1)] = {status:'recebido', dataRecebido:"2026-02-15"};
+  state.receipts[receiptKey(s1.id,2)] = {status:'recebido', dataRecebido:"2026-03-15"};
+  persistSale(s1); persistSale(s2);
+  persistReceiptOverride(s1.id, 1, true, "2026-02-15");
+  persistReceiptOverride(s1.id, 2, true, "2026-03-15");
+}
+
+/* ============================================================
+   SETUP GATE — mostra instrucoes se as credenciais nao foram preenchidas
+============================================================ */
+function showSetupGate(){
+  var el = document.createElement('div');
+  el.style.cssText = "position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;";
+  el.innerHTML =
+    '<div style="max-width:560px;background:var(--bg-elevated);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:var(--shadow);">'+
+    '<h2 style="font-family:var(--font-serif);margin:0 0 10px;font-size:20px;">Falta configurar o Supabase</h2>'+
+    '<p style="color:var(--ink-soft);font-size:14px;line-height:1.6;margin:0 0 14px;">Edite o arquivo <code>index.html</code> e preencha as constantes '+
+    '<code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> no topo do bloco <code>&lt;script&gt;</code> com os dados do seu projeto Supabase. '+
+    'Veja o passo a passo completo em <code>README.md</code>.</p>'+
+    '<p style="color:var(--ink-faint);font-size:13px;line-height:1.6;margin:0;">Até lá, o app funciona em modo local (dados só neste navegador) para você conferir o funcionamento.</p>'+
+    '<button id="setup-gate-dismiss" class="btn btn-primary" style="margin-top:16px;">Continuar em modo local</button>'+
+    '</div>';
+  document.body.appendChild(el);
+  document.getElementById('setup-gate-dismiss').addEventListener('click', function(){ el.remove(); });
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+async function init(){
+  if(isConfigured() && window.supabase && typeof window.supabase.createClient === 'function'){
+    try{
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      await loadFromDb();
+      dbReady = true;
+      setSyncBadge('cloud');
+      subscribeRealtime();
+    }catch(e){
+      console.warn("Falha ao carregar do Supabase, usando armazenamento local.", e);
+      dbReady = false;
+      loadLocal();
+      setSyncBadge('local');
+    }
+  } else {
+    dbReady = false;
+    loadLocal();
+    setSyncBadge('local');
+    showSetupGate();
+  }
+
+  impostoInput.value = state.impostoPct;
+  seedIfEmpty();
+  renderDashboard();
+  renderVendas();
+  renderRecebimentos();
+}
+
+/* Sincronizacao em tempo real: quando outra pessoa (ex: sua namorada) altera
+   os dados em outro dispositivo, esta aba recarrega e re-renderiza sozinha. */
+var realtimeTimer = null;
+function subscribeRealtime(){
+  function scheduleReload(){
+    clearTimeout(realtimeTimer);
+    realtimeTimer = setTimeout(async function(){
+      try{
+        await loadFromDb();
+        renderDashboard(); renderVendas(); renderRecebimentos();
+      }catch(e){ console.warn(e); }
+    }, 400);
+  }
+  sb.channel('consorcio-sync')
+    .on('postgres_changes', {event:'*', schema:'public', table:'sales'}, scheduleReload)
+    .on('postgres_changes', {event:'*', schema:'public', table:'receipt_overrides'}, scheduleReload)
+    .on('postgres_changes', {event:'*', schema:'public', table:'settings'}, scheduleReload)
+    .subscribe();
+}
+
+init();
+
+})();
+</script>
+</body>
+</html>
