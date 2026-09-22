@@ -15,9 +15,14 @@ create table if not exists sales (
   grupo text default '',
   cota text default '',
   valor_parcela numeric default 0,
+  seguro_prestamista text not null default 'Não',
   status text not null default 'Em andamento',
   created_at timestamptz not null default now()
 );
+
+-- Caso a tabela "sales" já existisse antes (instalação anterior), garante a
+-- coluna nova sem apagar nada que já está cadastrado.
+alter table sales add column if not exists seguro_prestamista text not null default 'Não';
 
 -- Uma linha por parcela marcada como recebida (o resto é calculado no app)
 create table if not exists receipt_overrides (
@@ -32,10 +37,26 @@ create table if not exists receipt_overrides (
 -- Configurações globais (uma única linha, id fixo = 1)
 create table if not exists settings (
   id int primary key default 1,
-  imposto_pct numeric not null default 6
+  imposto_pct numeric not null default 20
 );
-insert into settings (id, imposto_pct) values (1, 6)
+insert into settings (id, imposto_pct) values (1, 20)
   on conflict (id) do nothing;
+
+-- Leads (funil de vendas / CRM)
+create table if not exists leads (
+  id text primary key,
+  nome text not null,
+  telefone text default '',
+  email text default '',
+  origem text default 'Outro',
+  tipo_interesse text default 'Outro',
+  valor_estimado numeric default 0,
+  status text not null default 'Novo lead',
+  proximo_followup date,
+  observacoes text default '',
+  sale_id text references sales(id) on delete set null,
+  created_at timestamptz not null default now()
+);
 
 -- ------------------------------------------------------------
 -- Row Level Security
@@ -50,6 +71,7 @@ insert into settings (id, imposto_pct) values (1, 6)
 alter table sales enable row level security;
 alter table receipt_overrides enable row level security;
 alter table settings enable row level security;
+alter table leads enable row level security;
 
 drop policy if exists "allow all sales" on sales;
 create policy "allow all sales" on sales
@@ -61,6 +83,10 @@ create policy "allow all receipt_overrides" on receipt_overrides
 
 drop policy if exists "allow all settings" on settings;
 create policy "allow all settings" on settings
+  for all using (true) with check (true);
+
+drop policy if exists "allow all leads" on leads;
+create policy "allow all leads" on leads
   for all using (true) with check (true);
 
 -- ------------------------------------------------------------
@@ -83,5 +109,11 @@ end $$;
 do $$
 begin
   alter publication supabase_realtime add table settings;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table leads;
 exception when duplicate_object then null;
 end $$;
