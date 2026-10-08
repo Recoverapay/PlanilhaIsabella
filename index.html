@@ -3,807 +3,359 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carteira Consórcio — Vendas &amp; Comissões</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>CRM Isabella Almeida | Consórcios</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{
-  --bg: #F2F4F2;
-  --bg-elevated: #FFFFFF;
-  --ink: #0E2624;
-  --ink-soft: #3E5652;
-  --ink-faint: #7C8F8C;
-  --line: #DCE3E0;
-  --line-soft: #EAEEEC;
-  --brand: #0F6157;
-  --brand-ink: #0A4842;
-  --brand-tint: #E3EFEC;
-  --gold: #A6791F;
-  --gold-tint: #F6EEDC;
-  --green: #1E8E6B;
-  --green-tint: #E4F3ED;
-  --red: #B3261E;
-  --red-tint: #FBEAE9;
-  --shadow: 0 1px 2px rgba(14,38,36,.06), 0 4px 16px rgba(14,38,36,.05);
-  --radius-s: 6px;
-  --radius-m: 10px;
-  --radius-l: 16px;
-  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-  --font-sans: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+  --bg:#f8f4f1; --panel:#fffcfa; --panel2:#f4ebe6; --line:#e2d6cf;
+  --gold:#c9ab98; --gold2:#a3808d; --text:#4a3c42; --muted:#8d7a76;
+  --green:#6f9077; --red:#c77970; --yellow:#c5a16a; --blue:#8fa6b2;
+  --shadow:0 18px 50px rgba(104,82,92,.10);
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg: #0E1614;
-    --bg-elevated: #16211F;
-    --ink: #E8EDEB;
-    --ink-soft: #B6C4C0;
-    --ink-faint: #7C918C;
-    --line: #263532;
-    --line-soft: #1E2B28;
-    --brand: #2FB595;
-    --brand-ink: #7BD9C0;
-    --brand-tint: #17332C;
-    --gold: #E3B95C;
-    --gold-tint: #332A16;
-    --green: #3FBF97;
-    --green-tint: #16302A;
-    --red: #E38079;
-    --red-tint: #34201F;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-  }
-}
-:root[data-theme="dark"]{
-  --bg: #0E1614;
-  --bg-elevated: #16211F;
-  --ink: #E8EDEB;
-  --ink-soft: #B6C4C0;
-  --ink-faint: #7C918C;
-  --line: #263532;
-  --line-soft: #1E2B28;
-  --brand: #2FB595;
-  --brand-ink: #7BD9C0;
-  --brand-tint: #17332C;
-  --gold: #E3B95C;
-  --gold-tint: #332A16;
-  --green: #3FBF97;
-  --green-tint: #16302A;
-  --red: #E38079;
-  --red-tint: #34201F;
-  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-}
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:var(--font-sans);
-  font-size:15.5px;
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
-::selection{background:var(--brand-tint);color:var(--brand-ink);}
-button{font-family:inherit;}
-input,select{font-family:inherit;}
-.num{font-variant-numeric:tabular-nums;}
-
-/* ---------- layout ---------- */
-#app{display:flex;min-height:100vh;}
-
-.sidebar{
-  width:238px;
-  flex:0 0 238px;
-  background:var(--bg-elevated);
-  border-right:1px solid var(--line);
-  display:flex;
-  flex-direction:column;
-  padding:22px 16px;
-  position:sticky;
-  top:0;
-  height:100vh;
-}
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:4px 6px 22px 6px;
-  border-bottom:1px solid var(--line-soft);
-  margin-bottom:18px;
-}
-.brand-mark{
-  width:34px;height:34px;border-radius:9px;
-  background:linear-gradient(155deg,var(--brand),var(--brand-ink));
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-family:var(--font-serif);font-weight:700;font-size:18px;
-  flex:none;
-}
-.brand-text{display:flex;flex-direction:column;line-height:1.2;}
-.brand-text strong{font-family:var(--font-serif);font-size:17.5px;font-weight:600;}
-.brand-text span{font-size:12.5px;color:var(--ink-faint);}
-
-nav.mainnav{display:flex;flex-direction:column;gap:2px;}
-.navlink{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;border-radius:var(--radius-s);
-  color:var(--ink-soft);text-decoration:none;font-size:14.5px;font-weight:500;
-  cursor:pointer;border:none;background:none;width:100%;text-align:left;
-}
-.navlink:hover{background:var(--line-soft);color:var(--ink);}
-.navlink.active{background:var(--brand-tint);color:var(--brand-ink);font-weight:600;}
-.navlink svg{flex:none;opacity:.85;}
-.nav-count{
-  margin-left:auto;font-size:12px;color:var(--ink-faint);
-  background:var(--line-soft);border-radius:20px;padding:1px 7px;
-  font-variant-numeric:tabular-nums;
-}
-.nav-count.warn{background:var(--red-tint);color:var(--red);font-weight:700;}
-.navlink.active .nav-count{background:rgba(255,255,255,.55);color:var(--brand-ink);}
-
-.sidebar-foot{
-  margin-top:auto;padding-top:16px;border-top:1px solid var(--line-soft);
-  font-size:12.5px;color:var(--ink-faint);
-}
-.sync-badge{display:flex;align-items:center;gap:7px;cursor:default;}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--ink-faint);flex:none;}
-.sync-dot-on{background:var(--green);box-shadow:0 0 0 3px var(--green-tint);}
-.sync-dot-off{background:var(--gold);box-shadow:0 0 0 3px var(--gold-tint);}
-.sidebar-foot button{
-  display:flex;align-items:center;gap:7px;width:100%;
-  background:none;border:1px dashed var(--line);border-radius:var(--radius-s);
-  color:var(--ink-faint);padding:8px 10px;font-size:13px;cursor:pointer;margin-top:8px;
-}
-.sidebar-foot button:hover{border-color:var(--red);color:var(--red);}
-
-.main{flex:1;min-width:0;padding:26px 34px 60px;}
-.topbar{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:20px;margin-bottom:26px;flex-wrap:wrap;
-}
-.topbar h1{
-  font-family:var(--font-serif);font-weight:600;font-size:29px;margin:0 0 4px;
-  letter-spacing:-.01em;
-}
-.topbar p{margin:0;color:var(--ink-faint);font-size:14.5px;max-width:60ch;}
-.topbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-
-.taxctrl{
-  display:flex;align-items:center;gap:8px;background:var(--bg-elevated);
-  border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 10px;
-}
-.taxctrl label{font-size:12.5px;color:var(--ink-faint);white-space:nowrap;}
-.taxctrl input{
-  width:54px;border:none;background:none;color:var(--ink);font-weight:600;
-  font-size:14.5px;text-align:right;outline:none;
-}
-
-.btn{
-  display:inline-flex;align-items:center;gap:7px;
-  border-radius:var(--radius-s);border:1px solid transparent;
-  padding:10px 16px;font-size:14.5px;font-weight:600;cursor:pointer;
-  white-space:nowrap;
-}
-.btn-primary{background:var(--brand);color:#fff;}
-.btn-primary:hover{background:var(--brand-ink);}
-.btn-ghost{background:var(--bg-elevated);color:var(--ink-soft);border-color:var(--line);}
-.btn-ghost:hover{border-color:var(--ink-faint);color:var(--ink);}
-.btn-sm{padding:7px 11px;font-size:13.5px;}
-.btn-icon{padding:7px;border-radius:var(--radius-s);background:none;border:1px solid transparent;color:var(--ink-faint);cursor:pointer;}
-.btn-icon:hover{background:var(--line-soft);color:var(--ink);}
-
-.view{display:none;}
-.view.active{display:block;}
-
-/* ---------- KPI cards ---------- */
-.kpi-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;
-}
-.kpi-card{
-  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-m);
-  padding:18px 18px 16px;box-shadow:var(--shadow);
-}
-.kpi-label{font-size:12.5px;color:var(--ink-faint);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-.kpi-value{font-family:var(--font-serif);font-size:27px;font-weight:600;letter-spacing:-.01em;}
-.kpi-sub{font-size:12.5px;color:var(--ink-faint);margin-top:4px;}
-.kpi-card.accent{background:linear-gradient(160deg,var(--brand-tint),var(--bg-elevated));border-color:var(--brand);}
-.kpi-card.accent .kpi-value{color:var(--brand-ink);}
-
-.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;align-items:start;}
-
-.panel{
-  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-m);
-  box-shadow:var(--shadow);
-}
-.panel-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 18px;border-bottom:1px solid var(--line-soft);
-}
-.panel-head h2{font-family:var(--font-serif);font-size:18px;font-weight:600;margin:0;}
-.panel-head p{margin:3px 0 0;font-size:13px;color:var(--ink-faint);}
-.panel-body{padding:16px 18px 18px;}
-
-.future-list{display:flex;flex-direction:column;gap:0;}
-.future-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:11px 0;border-bottom:1px solid var(--line-soft);gap:10px;
-}
-.future-row:last-child{border-bottom:none;}
-.future-who{display:flex;flex-direction:column;min-width:0;}
-.future-who strong{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.future-who span{font-size:12.5px;color:var(--ink-faint);}
-.future-amt{font-weight:600;font-size:14.5px;white-space:nowrap;}
-.future-empty{color:var(--ink-faint);font-size:13.5px;padding:6px 0;}
-
-.buckets{display:flex;gap:8px;margin-bottom:6px;}
-.bucket{
-  flex:1;text-align:center;background:var(--line-soft);border-radius:var(--radius-s);
-  padding:10px 6px;
-}
-.bucket b{display:block;font-size:16.5px;font-family:var(--font-serif);}
-.bucket span{font-size:11.5px;color:var(--ink-faint);}
-
-/* ---------- tables ---------- */
-.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-.search{
-  display:flex;align-items:center;gap:7px;background:var(--bg-elevated);
-  border:1px solid var(--line);border-radius:var(--radius-s);padding:8px 12px;flex:1;min-width:180px;max-width:320px;
-}
-.search input{border:none;background:none;outline:none;color:var(--ink);font-size:14.5px;width:100%;}
-.search svg{flex:none;color:var(--ink-faint);}
-.select{
-  border:1px solid var(--line);background:var(--bg-elevated);color:var(--ink);
-  border-radius:var(--radius-s);padding:8px 10px;font-size:14.5px;outline:none;
-}
-.select:disabled{opacity:.45;cursor:not-allowed;}
-
-.table-wrap{
-  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-m);
-  overflow:hidden;box-shadow:var(--shadow);
-}
-.table-scroll{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:760px;}
-thead th{
-  text-align:left;font-size:12.5px;color:var(--ink-faint);font-weight:600;
-  padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
-  background:var(--line-soft);position:sticky;top:0;
-}
-tbody td{padding:12.5px 14px;border-bottom:1px solid var(--line-soft);white-space:nowrap;}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:var(--line-soft);}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
-td.wrap{white-space:normal;}
-
-.badge{
-  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;
-  font-size:12.5px;font-weight:600;
-}
-.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
-.badge-green{background:var(--green-tint);color:var(--green);}
-.badge-gold{background:var(--gold-tint);color:var(--gold);}
-.badge-red{background:var(--red-tint);color:var(--red);}
-.badge-muted{background:var(--line-soft);color:var(--ink-faint);}
-
-.rowactions{display:flex;gap:4px;justify-content:flex-end;}
-
-.empty-state{
-  text-align:center;padding:56px 20px;color:var(--ink-faint);
-}
-.empty-state h3{font-family:var(--font-serif);color:var(--ink);font-size:19px;margin:10px 0 4px;font-weight:600;}
-.empty-state p{font-size:14.5px;max-width:42ch;margin:0 auto;}
-
-.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--ink-faint);}
-.pagination .pg-btns{display:flex;gap:6px;}
-.pagination button{background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-s);padding:5px 10px;cursor:pointer;color:var(--ink-soft);}
-.pagination button:disabled{opacity:.4;cursor:default;}
-
-/* ---------- modal ---------- */
-.overlay{
-  position:fixed;inset:0;background:rgba(10,20,18,.45);backdrop-filter:blur(2px);
-  display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto;
-}
-.overlay.open{display:flex;}
-.modal{
-  background:var(--bg-elevated);border-radius:var(--radius-l);width:100%;max-width:640px;
-  box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--line);
-}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line-soft);}
-.modal-head h2{font-family:var(--font-serif);font-size:20px;margin:0;font-weight:600;}
-.modal-body{padding:22px 24px;}
-.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--line-soft);}
-
-.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.field{display:flex;flex-direction:column;gap:6px;}
-.field.span2{grid-column:span 2;}
-.field label{font-size:13px;font-weight:600;color:var(--ink-soft);}
-.field input,.field select,.field textarea{
-  border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 12px;
-  font-size:14.5px;background:var(--bg);color:var(--ink);outline:none;font-family:inherit;
-}
-.field textarea{resize:vertical;min-height:80px;line-height:1.5;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);}
-.field .hint{font-size:12px;color:var(--ink-faint);}
-.preview-box{
-  grid-column:span 2;background:var(--brand-tint);border-radius:var(--radius-s);
-  padding:12px 14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;
-  font-size:13.5px;
-}
-.preview-box div strong{display:block;font-family:var(--font-serif);font-size:16.5px;color:var(--brand-ink);}
-
-/* toast */
-#toast{
-  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:30px;font-size:14px;
-  font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;
-  transition:opacity .2s ease, transform .2s ease;z-index:100;
-}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-@media (max-width:880px){
-  .sidebar{position:fixed;left:-260px;z-index:60;transition:left .2s ease;box-shadow:0 0 0 2000px rgba(0,0,0,0);}
-  .sidebar.open{left:0;box-shadow:0 0 40px rgba(0,0,0,.3);}
-  .main{padding:18px 16px 60px;}
-  .kpi-grid{grid-template-columns:1fr 1fr;}
-  .grid-2{grid-template-columns:1fr;}
-  .formgrid{grid-template-columns:1fr;}
-  .field.span2{grid-column:span 1;}
-  .preview-box{grid-column:span 1;}
-  .topbar h1{font-size:24px;}
-  .menu-toggle{display:inline-flex !important;}
-}
-.menu-toggle{display:none;background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-s);padding:8px;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);margin-right:10px;}
-
-/* ---------- leads / kanban ---------- */
-.followup-banner{
-  display:flex;align-items:center;gap:10px;background:var(--gold-tint);border:1px solid var(--gold);
-  color:var(--gold);border-radius:var(--radius-m);padding:11px 16px;margin-bottom:16px;font-size:13.5px;font-weight:600;
-}
-.followup-banner.danger{background:var(--red-tint);border-color:var(--red);color:var(--red);}
-.followup-banner svg{flex:none;}
-
-.kanban{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:12px;overflow-x:auto;padding-bottom:8px;}
-.kanban-col{background:var(--line-soft);border-radius:var(--radius-m);padding:10px;min-width:230px;display:flex;flex-direction:column;}
-.kanban-col-head{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px;}
-.kanban-col-head h3{font-size:12.5px;font-weight:700;margin:0;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
-.kanban-col-count{font-size:11px;color:var(--ink-faint);background:var(--bg-elevated);border-radius:20px;padding:1px 8px;font-variant-numeric:tabular-nums;}
-.kanban-cards{display:flex;flex-direction:column;gap:8px;min-height:40px;}
-
-.lead-card{
-  background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius-s);
-  padding:12px 13px;box-shadow:var(--shadow);cursor:pointer;
-}
-.lead-card:hover{border-color:var(--brand);}
-.lead-card strong{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px;}
-.lead-card .lead-meta{font-size:11.5px;color:var(--ink-faint);margin-bottom:7px;}
-.lead-card .lead-value{font-size:12.5px;font-weight:600;color:var(--brand-ink);margin-bottom:7px;}
-.lead-followup{
-  display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
-  padding:3px 8px;border-radius:20px;background:var(--line-soft);color:var(--ink-faint);
-}
-.lead-followup.today{background:var(--gold-tint);color:var(--gold);}
-.lead-followup.late{background:var(--red-tint);color:var(--red);}
-.lead-followup.done{background:var(--green-tint);color:var(--green);}
-.lead-actions{display:flex;gap:6px;margin-top:9px;}
-.lead-actions button{flex:1;font-size:11.5px;padding:6px 4px;}
-
-.kanban-empty{font-size:12px;color:var(--ink-faint);text-align:center;padding:14px 4px;}
-
-@media (max-width:1100px){
-  .kanban{grid-template-columns:repeat(5,minmax(200px,1fr));}
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#f9f4f1,#f1e8e3);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{width:252px;background:linear-gradient(180deg,#8a6b78,#a3808d);border-right:1px solid rgba(255,255,255,.15);padding:22px 16px;position:fixed;inset:0 auto 0 0;z-index:20;display:flex;flex-direction:column}
+.brand{padding:8px 12px 22px}
+.brand .mark{font-size:22px;font-weight:800;color:#fff8f6;letter-spacing:.05em;line-height:1.15}
+.brand small{display:block;color:#f3e8e4;margin-top:6px}
+.nav{flex:1;overflow-y:auto}
+.nav button{width:100%;border:0;background:transparent;color:#f6ece9;padding:11px 14px;margin:3px 0;border-radius:12px;text-align:left;font-size:13.5px}
+.nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(255,255,255,.22),rgba(255,255,255,.08));color:#fff;border:1px solid rgba(255,255,255,.26)}
+.sync-badge{display:flex;align-items:center;gap:7px;color:#f3e8e4;font-size:11.5px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.18);margin-top:8px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#cbb;flex:none}
+.sync-dot-on{background:#9fd6b8}
+.sync-dot-off{background:#e8c27a}
+.main{margin-left:252px;padding:26px;width:calc(100% - 252px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+h1{font-size:24px;margin:0} .sub{color:var(--muted);font-size:13px;margin-top:5px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;font-size:13px}
+.btn.primary{background:linear-gradient(135deg,#a3808d,#c9ab98);color:#fff;border:none;font-weight:700}
+.btn.danger{border-color:rgba(199,121,112,.4);color:#a85a51}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 10px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.grid{display:grid;gap:14px}
+.cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+.card{background:linear-gradient(145deg,var(--panel),#f8f0ea);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}
+.metric .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.metric .value{font-size:23px;font-weight:800;margin-top:7px}
+.metric .hint{font-size:11.5px;margin-top:6px;color:var(--muted)}
+.gold{color:var(--gold2)} .green{color:#58765f}.red{color:#b35f57}.yellow{color:#9c7a42}
+.section{display:none}.section.active{display:block}
+.panel{background:rgba(255,252,250,.96);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.panel-head h2{font-size:16.5px;margin:0}
+.panel-head p{font-size:12px;color:var(--muted);margin:2px 0 0}
+.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+input,select,textarea{background:#fff;color:var(--text);border:1px solid #d8cbc4;border-radius:9px;padding:9px 11px;outline:none;font-size:13px}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+td.wrap{white-space:normal}
+th{color:#8a7470;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:#f6ece7;z-index:2}
+.table-wrap{overflow:auto;max-height:62vh;border:1px solid #e6dad3;border-radius:12px;background:#fff}
+.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid;white-space:nowrap}
+.badge.novo{color:#5e6f7a;border-color:#b4c0c8;background:#edf2f5}
+.badge.andamento{color:#8d6d35;border-color:#d3bb8e;background:#f8f0dd}
+.badge.fechado,.badge.recebido{color:#52705a;border-color:#adc0b2;background:#edf4ef}
+.badge.perdido{color:#985850;border-color:#ddb1ab;background:#fbefed}
+.badge.atrasado{color:#9c5b56;border-color:#e0b7b3;background:#fcf1f0}
+.badge.hoje{color:#8a6a35;border-color:#d8c39b;background:#fbf3e6}
+.badge.futuro{color:#776d78;border-color:#d1c3cb;background:#f4edf1}
+.badge.frio{color:#6f8294;border-color:#c2d0da;background:#eef3f6}
+.badge.morno{color:#9c7a42;border-color:#dcc399;background:#faf2e4}
+.badge.quente{color:#b35f44;border-color:#e3bba7;background:#fcefe9}
+.badge.muitoquente{color:#fff;border-color:#c77055;background:linear-gradient(135deg,#c77055,#d98f5c)}
+.form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;color:var(--muted);font-weight:600}
+.field .hint{font-size:10.5px;color:var(--muted);font-weight:400}
+.span2{grid-column:span 2}.span4{grid-column:span 4}
+.modal{display:none;position:fixed;inset:0;background:rgba(60,45,50,.55);z-index:100;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto}
+.modal.open{display:flex}
+.modal-card{width:min(1080px,96vw);max-height:none;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 25px 90px rgba(80,60,66,.35);margin-bottom:30px}
+.modal-card.sm{width:min(560px,96vw)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-head h3{margin:0;font-size:18px}
+.modal-head .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.divider{border:0;border-top:1px solid var(--line);margin:18px 0}
+.subhead{font-size:13px;font-weight:700;color:var(--gold2);margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em}
+.readonly-box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13px;margin-bottom:14px}
+.readonly-box b{display:block;font-size:14px}
+.timeline{display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;padding-right:4px}
+.timeline-item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.timeline-item .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px}
+.timeline-item .meta b{color:var(--gold2)}
+.timeline-item p{margin:4px 0 0;font-size:12.5px;line-height:1.5}
+.timeline-empty{text-align:center;color:var(--muted);font-size:12.5px;padding:18px}
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.column{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:260px}
+.column h3{font-size:12.5px;margin:4px 4px 10px;color:var(--gold2);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.lead-card{background:#fff;border:1px solid #e3d7d1;border-radius:12px;padding:12px;margin-bottom:9px}
+.lead-card strong{display:block;margin-bottom:5px}
+.muted{color:var(--muted);font-size:11px}.tiny{font-size:10px;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.space{justify-content:space-between}
+.alert{background:#fbf4e8;border:1px solid #dcc7a1;color:#8a6a35;padding:11px 13px;border-radius:11px;margin-bottom:13px;font-size:13px}
+.alert.soft{background:var(--panel2);border-color:var(--line);color:var(--text)}
+.empty{text-align:center;color:var(--muted);padding:32px;font-size:13px}
+.pipeline-track{display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:11.5px;color:var(--muted)}
+.pipeline-track .pt-step{padding:5px 12px;border-radius:20px;background:var(--panel2);border:1px solid var(--line)}
+.pipeline-track .pt-step.on{background:var(--gold2);color:#fff;border-color:var(--gold2);font-weight:700}
+.pipeline-track .pt-arrow{opacity:.5}
+.kpi2{grid-template-columns:2fr 1fr}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.overlay-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}
+.overlay-card{max-width:540px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px;box-shadow:var(--shadow)}
+.overlay-card h2{font-size:19px;margin:0 0 10px}
+.overlay-card p{color:var(--text);font-size:13.5px;line-height:1.6;margin:0 0 14px}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:#fff;padding:11px 18px;border-radius:30px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:300}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:1050px){.sidebar{width:190px}.main{margin-left:190px;width:calc(100% - 190px)}.cards{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}.span4{grid-column:span 2}.kanban{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.app{display:block}.sidebar{position:static;width:auto;display:block;padding:10px}.brand{padding:6px 8px 10px}.nav{display:flex;overflow-x:auto}.nav button{white-space:nowrap;width:auto}.sync-badge{display:none}.main{margin:0;width:100%;padding:14px}.topbar{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}.kanban{grid-template-columns:1fr}.kpi2{grid-template-columns:1fr}.modal{padding:8px}.modal-card{padding:14px}}
 </style>
 </head>
 <body>
-<div id="app">
-
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="brand-mark">C</div>
-      <div class="brand-text">
-        <strong>Carteira Consórcio</strong>
-        <span>Vendas &amp; comissões</span>
-      </div>
-    </div>
-    <nav class="mainnav">
-      <button class="navlink active" data-view="dashboard">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        Painel
-      </button>
-      <button class="navlink" data-view="leads">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Leads
-        <span class="nav-count" id="nav-count-leads">0</span>
-      </button>
-      <button class="navlink" data-view="vendas">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
-        Vendas
-        <span class="nav-count" id="nav-count-vendas">0</span>
-      </button>
-      <button class="navlink" data-view="recebimentos">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-        Recebimentos
-        <span class="nav-count" id="nav-count-receb">0</span>
-      </button>
-    </nav>
-    <div class="sidebar-foot">
-      <div id="sync-badge" class="sync-badge"><span class="sync-dot"></span> Carregando…</div>
-      <button id="btn-clear-all">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
-        Apagar todos os dados
-      </button>
-    </div>
-  </aside>
-
-  <main class="main">
-
-    <!-- ============ DASHBOARD ============ -->
-    <section class="view active" id="view-dashboard">
-      <div class="topbar">
-        <div style="display:flex;">
-          <button class="menu-toggle" id="menu-toggle-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-          <div>
-            <h1>Painel geral</h1>
-            <p>Visão consolidada da carteira: vendas, comissões previstas e fluxo de recebimentos.</p>
-          </div>
-        </div>
-        <div class="topbar-actions">
-          <div class="taxctrl">
-            <label for="dash-filter-mes">Período</label>
-            <select id="dash-filter-ano" class="select" style="border:none;background:none;padding:0 4px;font-size:13px;"></select>
-            <select id="dash-filter-mes" class="select" style="border:none;background:none;padding:0 4px;font-size:13px;">
-              <option value="">Todos os meses</option>
-              <option value="0">Janeiro</option>
-              <option value="1">Fevereiro</option>
-              <option value="2">Março</option>
-              <option value="3">Abril</option>
-              <option value="4">Maio</option>
-              <option value="5">Junho</option>
-              <option value="6">Julho</option>
-              <option value="7">Agosto</option>
-              <option value="8">Setembro</option>
-              <option value="9">Outubro</option>
-              <option value="10">Novembro</option>
-              <option value="11">Dezembro</option>
-            </select>
-          </div>
-          <div class="taxctrl">
-            <label for="input-imposto">Imposto sobre comissão</label>
-            <input type="number" id="input-imposto" step="0.1" min="0" max="100" value="20"><span style="color:var(--ink-faint);font-size:14px;">%</span>
-          </div>
-          <button class="btn btn-primary" id="btn-nova-venda-top">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
-            Nova venda
-          </button>
-        </div>
-      </div>
-
-      <div class="kpi-grid" id="kpi-grid"></div>
-
-      <div id="month-panel-wrap"></div>
-
-      <div class="grid-2">
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Comissão recebida × a receber</h2>
-              <p>Por mês, conforme a data prevista de cada parcela</p>
-            </div>
-          </div>
-          <div class="panel-body">
-            <canvas id="chart-mensal" height="230"></canvas>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Próximos recebimentos</h2>
-              <p>Parcelas em aberto mais próximas</p>
-            </div>
-          </div>
-          <div class="panel-body">
-            <div class="buckets" id="buckets"></div>
-            <div class="future-list" id="future-list" style="margin-top:14px;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-head">
-          <div>
-            <h2>Comissões por mês</h2>
-            <p>Créditos vendidos por data da venda; comissões pela data prevista de recebimento</p>
-          </div>
-        </div>
-        <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="monthly-table" style="min-width:640px;"></table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ LEADS (CRM) ============ -->
-    <section class="view" id="view-leads">
-      <div class="topbar">
-        <div style="display:flex;">
-          <button class="menu-toggle" id="menu-toggle-leads"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-          <div>
-            <h1>Leads</h1>
-            <p>Funil de vendas: acompanhe cada contato até virar uma venda.</p>
-          </div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary" id="btn-novo-lead">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
-            Novo lead
-          </button>
-        </div>
-      </div>
-
-      <div id="followup-banner-wrap"></div>
-
-      <div class="kanban" id="leads-kanban"></div>
-    </section>
-
-    <!-- ============ VENDAS ============ -->
-    <section class="view" id="view-vendas">
-      <div class="topbar">
-        <div style="display:flex;">
-          <button class="menu-toggle" id="menu-toggle-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-          <div>
-            <h1>Vendas</h1>
-            <p>Cada venda gera automaticamente seu cronograma de recebimento.</p>
-          </div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary" id="btn-nova-venda">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
-            Nova venda
-          </button>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="search">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="vendas-search" placeholder="Buscar cliente, grupo ou cota…">
-        </div>
-        <select class="select" id="vendas-filter-tipo">
-          <option value="">Todos os bens</option>
-          <option value="Imóvel">Imóvel</option>
-          <option value="Veículo">Veículo</option>
-          <option value="Outro">Outro</option>
-        </select>
-        <select class="select" id="vendas-filter-status">
-          <option value="">Todos os status</option>
-          <option value="Em andamento">Em andamento</option>
-          <option value="Concluída">Concluída</option>
-          <option value="Cancelada">Cancelada</option>
-        </select>
-      </div>
-
-      <div class="table-wrap" id="vendas-table-wrap"></div>
-    </section>
-
-    <!-- ============ RECEBIMENTOS ============ -->
-    <section class="view" id="view-recebimentos">
-      <div class="topbar">
-        <div style="display:flex;">
-          <button class="menu-toggle" id="menu-toggle-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-          <div>
-            <h1>Recebimentos</h1>
-            <p>Cronograma parcela a parcela de todas as vendas. Marque como recebido quando o valor cair na conta.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="search">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="receb-search" placeholder="Buscar cliente, grupo ou cota…">
-        </div>
-        <select class="select" id="receb-filter-status">
-          <option value="">Todos os status</option>
-          <option value="a_receber">A receber</option>
-          <option value="recebido">Recebido</option>
-          <option value="atrasado">Atrasado</option>
-        </select>
-        <select class="select" id="receb-filter-periodo">
-          <option value="">Qualquer período</option>
-          <option value="30">Próximos 30 dias</option>
-          <option value="60">Próximos 60 dias</option>
-          <option value="90">Próximos 90 dias</option>
-        </select>
-        <span style="color:var(--ink-faint);font-size:12.5px;">ou mês fechado:</span>
-        <select class="select" id="receb-filter-ano">
-          <option value="">Ano</option>
-        </select>
-        <select class="select" id="receb-filter-mes">
-          <option value="">Todos os meses</option>
-          <option value="0">Janeiro</option>
-          <option value="1">Fevereiro</option>
-          <option value="2">Março</option>
-          <option value="3">Abril</option>
-          <option value="4">Maio</option>
-          <option value="5">Junho</option>
-          <option value="6">Julho</option>
-          <option value="7">Agosto</option>
-          <option value="8">Setembro</option>
-          <option value="9">Outubro</option>
-          <option value="10">Novembro</option>
-          <option value="11">Dezembro</option>
-        </select>
-      </div>
-
-      <div class="table-wrap" id="receb-table-wrap"></div>
-    </section>
-
-  </main>
-</div>
-
-<!-- ============ MODAL: NOVA VENDA ============ -->
-<div class="overlay" id="modal-venda">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="modal-venda-title">Nova venda</h2>
-      <button class="btn-icon" id="modal-venda-close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="modal-body">
-      <form id="form-venda">
-        <div class="formgrid">
-          <div class="field">
-            <label for="f-data">Data da venda</label>
-            <input type="date" id="f-data" required>
-          </div>
-          <div class="field">
-            <label for="f-cliente">Cliente</label>
-            <input type="text" id="f-cliente" placeholder="Nome do cliente" required>
-          </div>
-          <div class="field">
-            <label for="f-tipo">Tipo de bem</label>
-            <select id="f-tipo">
-              <option>Imóvel</option>
-              <option>Veículo</option>
-              <option>Outro</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-credito">Valor do crédito (R$)</label>
-            <input type="number" id="f-credito" min="0" step="0.01" placeholder="0,00" required>
-          </div>
-          <div class="field">
-            <label for="f-plano">Plano</label>
-            <select id="f-plano" required>
-              <option value="">Selecione...</option>
-              <option value="100%">100%</option>
-              <option value="85%">85%</option>
-              <option value="70%">70%</option>
-              <option value="55%">55%</option>
-              <option value="50%">50%</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-parcelas">Quantidade de parcelas</label>
-            <input type="number" id="f-parcelas" min="1" max="240" step="1" placeholder="Ex.: 200" required>
-          </div>
-          <div class="field">
-            <label for="f-grupo">Grupo</label>
-            <input type="text" id="f-grupo" placeholder="Ex.: 1234">
-          </div>
-          <div class="field">
-            <label for="f-cota">Cota</label>
-            <input type="text" id="f-cota" placeholder="Ex.: 056">
-          </div>
-          <div class="field">
-            <label for="f-valorparcela">Valor da parcela (R$)</label>
-            <input type="number" id="f-valorparcela" min="0" step="0.01" placeholder="0,00">
-          </div>
-          <div class="field">
-            <label for="f-seguro">Seguro prestamista</label>
-            <select id="f-seguro">
-              <option value="Não">Não</option>
-              <option value="Sim">Sim</option>
-            </select>
-          </div>
-          <div class="field span2">
-            <label for="f-status">Status da venda</label>
-            <select id="f-status">
-              <option>Em andamento</option>
-              <option>Concluída</option>
-              <option>Cancelada</option>
-            </select>
-          </div>
-
-          <div class="preview-box" id="f-preview">
-            <div><span class="hint">Comissão total prevista</span><strong id="f-preview-total">R$ 0,00</strong></div>
-            <div><span class="hint">2% por parcela (1ª–<span id="f-preview-range">13ª</span>)</span><strong id="f-preview-p1">R$ 0,00</strong></div>
-            <div><span class="hint">Seguro (14ª, se marcado)</span><strong id="f-preview-seguro">R$ 0,00</strong></div>
-            <div><span class="hint">Bonificação 0,3% (15ª)</span><strong id="f-preview-bonif">R$ 0,00</strong></div>
-            <div><span class="hint">Compartilhada 0,7% (16ª–última, cada)</span><strong id="f-preview-comp">R$ 0,00</strong></div>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" id="modal-venda-cancel">Cancelar</button>
-      <button class="btn btn-primary" id="modal-venda-save">Salvar venda</button>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="mark">ISABELLA<br>ALMEIDA</div><small>CRM • Consórcios</small></div>
+  <nav class="nav" id="nav">
+    <button class="active" data-target="dashboard">▦ Dashboard</button>
+    <button data-target="prospects">◌ Prospects</button>
+    <button data-target="leads">◉ Leads</button>
+    <button data-target="perdidos">⊘ Leads perdidos</button>
+    <button data-target="followup">↻ Follow-up</button>
+    <button data-target="carteira">◆ Carteira</button>
+    <button data-target="recebimentos">R$ Recebimentos</button>
+    <button data-target="config">⚙ Configurações</button>
+  </nav>
+  <div class="sync-badge" id="sync-badge"><span class="sync-dot"></span> Carregando…</div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <div><h1 id="pageTitle">Dashboard</h1><div class="sub" id="pageSub">Gestão comercial e financeira de consórcios</div></div>
+    <div class="actions">
+      <button class="btn" onclick="exportData()">Exportar backup</button>
+      <button class="btn primary" onclick="openProspect()">+ Novo prospect</button>
     </div>
   </div>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="dashboard" class="section active">
+    <div class="panel">
+      <div class="panel-head"><h2>Filtro do dashboard</h2><div class="filters">
+        <select id="dashAno" onchange="renderDashboard()"></select>
+        <select id="dashMes" onchange="renderDashboard()"></select>
+      </div></div>
+    </div>
+    <div class="grid cards" id="dashCards"></div>
+    <div class="grid kpi2">
+      <div class="panel"><div class="panel-head"><h2>Comissões por mês</h2><select id="resumoAno" onchange="renderMonthly()"></select></div><div class="table-wrap" style="max-height:420px"><table><thead><tr><th>Mês</th><th>Créditos vendidos</th><th>Comissão bruta</th><th>Imposto</th><th>Comissão líquida</th><th>Recebida</th><th>A receber</th></tr></thead><tbody id="monthlyBody"></tbody></table></div></div>
+      <div class="panel"><h2 style="font-size:16.5px;margin-top:0">Próximos recebimentos</h2><div id="nextReceipts"></div></div>
+    </div>
+  </section>
+
+  <!-- ============ PROSPECTS ============ -->
+  <section id="prospects" class="section">
+    <div class="panel">
+      <div class="panel-head"><h2>Prospects</h2><p>Pessoas em fase de abordagem — ainda sem oportunidade de consórcio definida</p>
+        <div class="filters"><input id="prospectSearch" placeholder="Buscar nome/telefone…" oninput="renderProspects()"><button class="btn primary" onclick="openProspect()">+ Novo prospect</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Empresa</th><th>Origem</th><th>Indicador</th><th>1º contato</th><th>Resultado</th><th>Próxima etapa</th><th>Data</th><th></th></tr></thead><tbody id="prospectBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ LEADS ============ -->
+  <section id="leads" class="section">
+    <div class="panel">
+      <div class="panel-head"><h2>Leads</h2><p>Oportunidades ativas — já demonstraram interesse</p>
+        <div class="filters"><input id="leadSearch" placeholder="Buscar nome/telefone…" oninput="renderLeads()"></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Interesse</th><th>Crédito pretendido</th><th>Temperatura</th><th>Próxima etapa</th><th>Data</th><th></th></tr></thead><tbody id="leadBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ LEADS PERDIDOS ============ -->
+  <section id="perdidos" class="section">
+    <div class="panel"><div class="panel-head"><h2>Leads perdidos</h2><p>Histórico preservado — pode reabrir a qualquer momento</p></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Interesse</th><th>Crédito pretendido</th><th>Data</th><th>Motivo</th><th></th></tr></thead><tbody id="lostBody"></tbody></table></div></div>
+  </section>
+
+  <!-- ============ FOLLOW-UP ============ -->
+  <section id="followup" class="section">
+    <div id="followAlert"></div>
+    <div class="kanban" id="followKanban"></div>
+  </section>
+
+  <!-- ============ CARTEIRA ============ -->
+  <section id="carteira" class="section">
+    <div class="panel"><div class="panel-head"><h2>Carteira</h2><p>Clientes com venda registrada</p>
+      <div class="filters"><input id="walletSearch" placeholder="Buscar cliente, grupo ou cota…" oninput="renderWallet()"><button class="btn primary" onclick="openVendaModal('')">+ Nova venda</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Nº venda</th><th>Data</th><th>Cliente</th><th>Bem</th><th>Crédito</th><th>Plano</th><th>Parcelas</th><th>Grupo/Cota</th><th>Prestamista</th><th>Comissão prevista</th><th>Recebida</th><th>A receber</th><th>Status</th><th>Pós-venda</th><th></th></tr></thead><tbody id="walletBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ RECEBIMENTOS ============ -->
+  <section id="recebimentos" class="section">
+    <div class="panel">
+      <div class="panel-head"><h2>Recebimentos</h2><div class="filters">
+        <select id="recAno" onchange="renderReceipts()"></select><select id="recMes" onchange="renderReceipts()"></select>
+        <select id="recStatus" onchange="renderReceipts()"><option value="">Todos os status</option><option>A receber</option><option>Recebido</option></select>
+      </div></div>
+      <div class="grid cards" id="receiptCards"></div>
+      <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Grupo</th><th>Cota</th><th>Crédito</th><th>Plano</th><th>Nº parcela</th><th>Data prevista</th><th>Comissão 2%</th><th>0,7%</th><th>Seguro 0,11%</th><th>Bônus 0,3%</th><th>Bruta</th><th>Imposto</th><th>Líquida</th><th>Data efetiva</th><th>Status</th><th></th></tr></thead><tbody id="receiptBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ CONFIGURAÇÕES ============ -->
+  <section id="config" class="section">
+    <div class="panel"><h2 style="margin-top:0">Configurações</h2><div class="settings-grid">
+      <div class="field"><label>Imposto sobre comissão (%)</label><input id="taxInput" type="number" min="0" max="100" step=".01"><small class="muted">Padrão inicial: 20%. Alterar aqui recalcula as comissões líquidas.</small></div>
+      <div class="field"><label>Administradora / observação</label><input id="adminInput" placeholder="Ex.: Ademicon"></div>
+    </div><div class="actions" style="margin-top:14px"><button class="btn primary" onclick="saveSettings()">Salvar configurações</button><button class="btn" onclick="document.getElementById('importFile').click()">Importar backup</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div></div>
+    <div class="panel"><h2 style="margin-top:0">Regras automatizadas</h2><div class="muted" style="line-height:1.8;font-size:12.5px">• 2% do crédito: parcelas 1–13 nos planos 100%, 85% e 70%; parcelas 1–15 nos planos 55% e 50%.<br>• Seguro prestamista: 0,11% integral na parcela 14 quando contratado.<br>• Bonificação: 0,3% integral na parcela 15 em todos os planos.<br>• Comissão compartilhada: 0,7% distribuída igualmente da parcela 16 até a última.<br>• Todo recebimento previsto ocorre no dia 1º do mês correspondente.<br>• Venda registrada alimenta automaticamente Carteira e Recebimentos.<br>• Fluxo único: Prospect → Lead → Carteira, sem recadastro do cliente.</div></div>
+  </section>
+</main>
 </div>
 
-<!-- ============ MODAL: NOVO / EDITAR LEAD ============ -->
-<div class="overlay" id="modal-lead">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="modal-lead-title">Novo lead</h2>
-      <button class="btn-icon" id="modal-lead-close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="modal-body">
-      <form id="form-lead">
-        <div class="formgrid">
-          <div class="field">
-            <label for="l-nome">Nome</label>
-            <input type="text" id="l-nome" placeholder="Nome do lead" required>
-          </div>
-          <div class="field">
-            <label for="l-telefone">Telefone / WhatsApp</label>
-            <input type="text" id="l-telefone" placeholder="(00) 00000-0000">
-          </div>
-          <div class="field">
-            <label for="l-email">E-mail</label>
-            <input type="email" id="l-email" placeholder="email@exemplo.com">
-          </div>
-          <div class="field">
-            <label for="l-origem">Origem</label>
-            <select id="l-origem">
-              <option>Indicação</option>
-              <option>Redes sociais</option>
-              <option>Site</option>
-              <option>Evento</option>
-              <option>Outro</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="l-tipo">Interesse em</label>
-            <select id="l-tipo">
-              <option>Imóvel</option>
-              <option>Veículo</option>
-              <option>Outro</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="l-valor">Valor de crédito estimado (R$)</label>
-            <input type="number" id="l-valor" min="0" step="0.01" placeholder="0,00">
-          </div>
-          <div class="field">
-            <label for="l-status">Etapa do funil</label>
-            <select id="l-status">
-              <option>Novo lead</option>
-              <option>Contato iniciado</option>
-              <option>Proposta enviada</option>
-              <option>Em negociação</option>
-              <option>Convertido</option>
-              <option>Perdido</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="l-followup">Próximo follow-up</label>
-            <input type="date" id="l-followup">
-          </div>
-          <div class="field span2">
-            <label for="l-obs">Observações / histórico de contato</label>
-            <textarea id="l-obs" placeholder="Anotações sobre a conversa, o que foi combinado, etc."></textarea>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" id="modal-lead-delete" style="margin-right:auto;color:var(--red);">Excluir lead</button>
-      <button class="btn btn-ghost" id="modal-lead-cancel">Cancelar</button>
-      <button class="btn btn-primary" id="modal-lead-save">Salvar lead</button>
-    </div>
+<!-- ============ MODAL: PROSPECT ============ -->
+<div id="prospectModal" class="modal">
+ <div class="modal-card"><div class="modal-head"><div><h3 id="prospectModalTitle">Novo prospect</h3><div class="sub">Pessoa em fase de abordagem</div></div><button class="btn" onclick="closeModal('prospectModal')">✕</button></div>
+ <form id="prospectForm" onsubmit="saveProspect(event)">
+  <input type="hidden" id="prospectId">
+  <div class="form-grid">
+   <div class="field"><label>Nome *</label><input id="pNome" required></div>
+   <div class="field"><label>Telefone *</label><input id="pTel" required></div>
+   <div class="field"><label>Empresa</label><input id="pEmpresa"></div>
+   <div class="field"><label>Cargo</label><input id="pCargo"></div>
+   <div class="field"><label>Origem *</label><select id="pOrigem" required></select></div>
+   <div class="field"><label>Indicador</label><input id="pIndicador" placeholder="Quem indicou?"></div>
+   <div class="field"><label>Data do primeiro contato *</label><input id="pPrimeiro" type="date" required></div>
+   <div class="field"><label>Forma de contato</label><select id="pForma"><option>WhatsApp</option><option>Ligação</option><option>Reunião</option><option>Presencial</option></select></div>
+   <div class="field span2"><label>Resultado da abordagem</label><select id="pResultado"></select></div>
+   <div class="field"><label>Último contato</label><input id="pUltimo" type="date"></div>
+   <div class="field"><label>Próxima etapa</label><select id="pProximaEtapa"></select></div>
+   <div class="field"><label>Data do próximo contato</label><input id="pDataAcao" type="date"></div>
+   <div class="field span4"><label>Observações</label><textarea id="pObs" rows="2"></textarea></div>
   </div>
+  <div class="actions" style="margin-top:18px;justify-content:flex-end">
+    <button type="button" class="btn" onclick="closeModal('prospectModal')">Cancelar</button>
+    <button type="button" class="btn primary" id="prospectToLeadBtn" style="display:none" onclick="virarLead()">🔼 Virar Lead</button>
+    <button class="btn primary">Salvar prospect</button>
+  </div>
+ </form></div>
+</div>
+
+<!-- ============ MODAL: LEAD ============ -->
+<div id="leadModal" class="modal">
+ <div class="modal-card"><div class="modal-head"><div><h3 id="leadModalTitle">Lead</h3><div class="sub" id="leadModalSub">Oportunidade ativa</div></div><button class="btn" onclick="closeModal('leadModal')">✕</button></div>
+
+ <div class="pipeline-track" id="leadPipelineTrack"></div>
+
+ <form id="leadForm" onsubmit="saveLead(event)">
+  <input type="hidden" id="leadId">
+  <p class="subhead">Dados do cliente</p>
+  <div class="form-grid">
+   <div class="field"><label>Nome *</label><input id="lNome" required></div>
+   <div class="field"><label>Telefone *</label><input id="lTel" required></div>
+   <div class="field"><label>E-mail</label><input id="lEmail" type="email"></div>
+   <div class="field"><label>Empresa</label><input id="lEmpresa"></div>
+   <div class="field"><label>Cargo</label><input id="lCargo"></div>
+   <div class="field"><label>Indicador</label><input id="lIndicador"></div>
+   <div class="field"><label>Origem *</label><select id="lOrigem" required></select></div>
+   <div class="field"><label>Temperatura 🔥</label><select id="lTemperatura"></select></div>
+  </div>
+
+  <hr class="divider">
+  <p class="subhead">Oportunidade</p>
+  <div class="form-grid">
+   <div class="field"><label>Interesse</label><select id="lInteresse"></select></div>
+   <div class="field span2"><label>Objetivo</label><input id="lObjetivo" placeholder="Ex.: trocar frota em 2027"></div>
+   <div class="field"><label>Faixa de crédito</label><select id="lFaixaCredito"></select></div>
+   <div class="field"><label>Crédito pretendido (após simulação)</label><input id="lCreditoPretendido" type="number" min="0" step=".01"></div>
+   <div class="field"><label>Parcela estimada</label><input id="lParcela" type="number" min="0" step=".01"></div>
+   <div class="field"><label>Estratégia</label><input id="lEstrategia" placeholder="Como pretende conduzir"></div>
+   <div class="field span2"><label>Condição apresentada / última proposta</label><input id="lCondicao"></div>
+  </div>
+
+  <hr class="divider">
+  <p class="subhead">Acompanhamento</p>
+  <div class="form-grid">
+   <div class="field"><label>Status</label><select id="lStatusLead"><option value="Ativo">Ativo</option><option value="Perdido">Perdido</option></select></div>
+   <div class="field" id="lMotivoWrap" style="display:none"><label>Motivo da perda</label><select id="lMotivo"></select></div>
+   <div class="field"><label>Último contato</label><input id="lUltimo" type="date"></div>
+   <div class="field"><label>Próxima etapa</label><select id="lProximaEtapa"></select></div>
+   <div class="field"><label>Data da próxima etapa</label><input id="lDataAcao" type="date"></div>
+   <div class="field span4"><label>Observações gerais</label><textarea id="lObs" rows="2"></textarea></div>
+  </div>
+
+  <div class="actions" style="margin-top:18px;justify-content:flex-end">
+    <button type="button" class="btn" onclick="closeModal('leadModal')">Cancelar</button>
+    <button class="btn primary">Salvar lead</button>
+  </div>
+ </form>
+
+ <div id="leadExtraActions" style="display:none">
+   <hr class="divider">
+   <div class="row space" style="margin-bottom:12px">
+     <p class="subhead" style="margin:0">Histórico de contatos</p>
+     <div class="row">
+       <button type="button" class="btn sm" id="leadReabrirBtn" style="display:none" onclick="reabrirOportunidade()">🔄 Reabrir oportunidade</button>
+       <button type="button" class="btn sm primary" onclick="openContato()">+ Registrar contato</button>
+       <button type="button" class="btn sm primary" id="leadVendaBtn" onclick="openVendaModal(currentLeadId)">💰 Registrar venda</button>
+     </div>
+   </div>
+   <div class="timeline" id="leadTimeline"></div>
+ </div>
+ </div>
+</div>
+
+<!-- ============ MODAL: REGISTRAR CONTATO ============ -->
+<div id="contatoModal" class="modal">
+  <div class="modal-card sm"><div class="modal-head"><h3>Registrar contato</h3><button class="btn" onclick="closeModal('contatoModal')">✕</button></div>
+  <form onsubmit="saveContato(event)">
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+      <div class="field"><label>Data *</label><input id="cData" type="date" required></div>
+      <div class="field"><label>Tipo</label><select id="cTipo"><option>WhatsApp</option><option>Ligação</option><option>Reunião</option><option>Presencial</option></select></div>
+      <div class="field span2"><label>Resultado</label><input id="cResultado" placeholder="Ex.: demonstrou interesse em imóvel"></div>
+      <div class="field span2"><label>Observação</label><textarea id="cObs" rows="2"></textarea></div>
+      <div class="field"><label>Próximo passo</label><select id="cProximoPasso"></select></div>
+      <div class="field"><label>Data do próximo passo</label><input id="cDataProximoPasso" type="date"></div>
+    </div>
+    <div class="actions" style="margin-top:16px;justify-content:flex-end"><button type="button" class="btn" onclick="closeModal('contatoModal')">Cancelar</button><button class="btn primary">Registrar</button></div>
+  </form></div>
+</div>
+
+<!-- ============ MODAL: VENDA ============ -->
+<div id="saleModal" class="modal">
+ <div class="modal-card"><div class="modal-head"><div><h3>Registrar venda</h3><div class="sub">Gera automaticamente o cronograma de recebimento</div></div><button class="btn" onclick="closeModal('saleModal')">✕</button></div>
+ <form id="saleForm" onsubmit="saveSale(event)">
+  <input type="hidden" id="saleId"><input type="hidden" id="saleLeadId">
+  <div class="readonly-box" id="saleClientBox" style="display:none">
+    <small class="muted">Cliente (do cadastro do lead)</small>
+    <b id="saleClientName"></b>
+  </div>
+  <div class="form-grid">
+   <div class="field"><label>Nº da venda *</label><input id="sNumero" required></div>
+   <div class="field"><label>Data da venda *</label><input id="sData" type="date" required></div>
+   <div class="field span2" id="sClienteWrap"><label>Cliente *</label><input id="sCliente" required></div>
+   <div class="field" id="sTelWrap"><label>Telefone</label><input id="sTel"></div>
+   <div class="field" id="sEmailWrap"><label>E-mail</label><input id="sEmail" type="email"></div>
+   <div class="field"><label>Tipo de bem</label><select id="sTipo"><option>Imóvel</option><option>Veículo</option><option>Outro</option></select></div>
+   <div class="field"><label>Valor do crédito *</label><input id="sCredito" type="number" min="0" step=".01" required></div>
+   <div class="field"><label>Plano *</label><select id="sPlano" required><option>100%</option><option>85%</option><option>70%</option><option>55%</option><option>50%</option></select></div>
+   <div class="field"><label>Quantidade de parcelas *</label><input id="sQtd" type="number" min="16" required value="220"></div>
+   <div class="field"><label>Grupo</label><input id="sGrupo"></div><div class="field"><label>Cota</label><input id="sCota"></div>
+   <div class="field"><label>Valor da parcela</label><input id="sParcela" type="number" min="0" step=".01"></div>
+   <div class="field"><label>Forma de pagamento</label><select id="sFormaPagamento"><option>Boleto</option><option>Débito automático</option><option>Cartão</option><option>Pix</option><option>Outro</option></select></div>
+   <div class="field"><label>Seguro prestamista *</label><select id="sSeguro"><option>Não</option><option>Sim</option></select></div>
+   <div class="field"><label>Status da venda</label><select id="sStatus"><option>Emitida</option><option>Ativa</option><option>Cancelada</option></select></div>
+   <div class="field span2"><label>Ação de pós-venda</label><input id="sPos" placeholder="Ex.: enviar boleto, acompanhar assembleia"></div>
+  </div>
+  <div class="actions" style="margin-top:18px;justify-content:flex-end"><button type="button" class="btn" onclick="closeModal('saleModal')">Cancelar</button><button class="btn primary">Salvar venda e gerar cronograma</button></div>
+ </form></div>
 </div>
 
 <div id="toast"></div>
@@ -813,34 +365,53 @@ td.wrap{white-space:normal;}
 "use strict";
 
 /* ============================================================
-   STORAGE — Supabase (Postgres na nuvem)
-   Preencha SUPABASE_URL e SUPABASE_ANON_KEY abaixo (veja README.md)
-   antes de usar. Sem isso, o app roda só localmente (localStorage).
+   SUPABASE
 ============================================================ */
 var SUPABASE_URL = "https://uiwwjudfiyfmivudszyp.supabase.co";
 var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd3dqdWRmaXlmbWl2dWRzenlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NTk5ODksImV4cCI6MjEwNTMzNTk4OX0.CnHLVagZcYgDqYhxHz8E_XZTKcDMD-YHhObyvzoTe90";
+var STORE_KEY = "consorcio_crm_v2";
+var sb = null, dbReady = false;
 
-var STORE_KEY = "consorcio_crm_v1";
-var state = { sales: [], receipts: {}, impostoPct: 20, leads: [] };
-var sb = null;
-var dbReady = false;
+var state = { clients: [], sales: [], receipts: {}, impostoPct: 20, admin: "" };
 
 function isConfigured(){
   return SUPABASE_URL.indexOf("COLE_AQUI") === -1 && SUPABASE_ANON_KEY.indexOf("COLE_AQUI") === -1
     && SUPABASE_URL.length > 10 && SUPABASE_ANON_KEY.length > 10;
 }
-
 function uid(){
   if(window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-  return 's_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+  return 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+}
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
 }
 
+/* ============================================================
+   LOCAL STORAGE
+============================================================ */
 function loadLocal(){
   try{
     var raw = localStorage.getItem(STORE_KEY);
-    if(raw){
-      var parsed = JSON.parse(raw);
-      state = Object.assign(state, parsed);
+    if(raw){ state = Object.assign(state, JSON.parse(raw)); }
+    else {
+      // migra de versões antigas (v1: sales/leads separados) se existirem
+      var old = localStorage.getItem('consorcio_crm_v1');
+      if(old){
+        try{
+          var op = JSON.parse(old);
+          if(op.sales) state.sales = op.sales.map(function(s){ return normalizeSale(s); });
+          if(typeof op.impostoPct === 'number') state.impostoPct = op.impostoPct;
+          if(op.receipts) state.receipts = op.receipts;
+          if(op.leads) state.clients = op.leads.map(function(l){
+            return normalizeClient({ id:l.id, nome:l.nome, telefone:l.telefone, email:l.email,
+              origem:l.origem, interesse:l.tipoInteresse, obs:l.observacoes,
+              stage: l.saleId ? 'carteira' : 'lead', history:[] });
+          });
+          saveLocal();
+        }catch(e){ console.warn('Falha ao migrar dados antigos', e); }
+      }
     }
   }catch(e){ console.warn("Não foi possível carregar dados salvos.", e); }
 }
@@ -848,45 +419,70 @@ function saveLocal(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
   catch(e){ console.warn("Não foi possível salvar os dados.", e); showToast("Não foi possível salvar (armazenamento indisponível)."); }
 }
+function normalizeClient(c){
+  return Object.assign({
+    id:uid(), nome:'', telefone:'', email:'', empresa:'', cargo:'', indicador:'', origem:'Outro',
+    primeiroContato:'', formaContato:'WhatsApp', resultadoAbordagem:'Ainda não contatado',
+    ultimoContato:'', proximaEtapa:'', dataProximaEtapa:'', obs:'',
+    temperatura:'Morno', interesse:'Outro', objetivo:'', faixaCredito:'Ainda não definido',
+    creditoPretendido:0, parcelaEstimada:0, estrategia:'', condicao:'',
+    stage:'prospect', statusLead:'Ativo', motivoPerda:'', history:[],
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
+  }, c);
+}
+function normalizeSale(s){
+  return Object.assign({ id:uid(), clientId:null, numero:'', data:'', cliente:'', telefone:'', email:'',
+    tipo:'Outro', credito:0, plano:'100%', qtd:220, grupo:'', cota:'', parcela:0,
+    formaPagamento:'Boleto', seguro:'Não', status:'Emitida', pos:'' }, s);
+}
 
-/* Carrega tudo do Supabase para dentro de `state` */
+/* ============================================================
+   SUPABASE PERSISTENCE
+============================================================ */
 async function loadFromDb(){
-  var settingsRes = await sb.from('settings').select('*').eq('id', 1).maybeSingle();
+  var settingsRes = await sb.from('settings').select('*').eq('id',1).maybeSingle();
   if(settingsRes.error) throw settingsRes.error;
-  if(settingsRes.data && typeof settingsRes.data.imposto_pct === 'number'){
-    state.impostoPct = settingsRes.data.imposto_pct;
+  if(settingsRes.data){
+    if(typeof settingsRes.data.imposto_pct === 'number') state.impostoPct = settingsRes.data.imposto_pct;
+    state.admin = settingsRes.data.admin || "";
   } else {
-    await sb.from('settings').upsert({id:1, imposto_pct: state.impostoPct});
+    await sb.from('settings').upsert({id:1, imposto_pct:state.impostoPct, admin:state.admin});
   }
 
-  var salesRes = await sb.from('sales').select('*').order('data', {ascending:false});
+  var clientsRes = await sb.from('clients').select('*').order('created_at',{ascending:false});
+  if(clientsRes.error) throw clientsRes.error;
+  state.clients = (clientsRes.data||[]).map(function(r){
+    return normalizeClient({
+      id:r.id, nome:r.nome, telefone:r.telefone||'', email:r.email||'', empresa:r.empresa||'',
+      cargo:r.cargo||'', indicador:r.indicador||'', origem:r.origem||'Outro',
+      primeiroContato:r.primeiro_contato||'', formaContato:r.forma_contato||'WhatsApp',
+      resultadoAbordagem:r.resultado_abordagem||'Ainda não contatado', ultimoContato:r.ultimo_contato||'',
+      proximaEtapa:r.proxima_etapa||'', dataProximaEtapa:r.data_proxima_etapa||'', obs:r.obs||'',
+      temperatura:r.temperatura||'Morno', interesse:r.interesse||'Outro', objetivo:r.objetivo||'',
+      faixaCredito:r.faixa_credito||'Ainda não definido', creditoPretendido:Number(r.credito_pretendido)||0,
+      parcelaEstimada:Number(r.parcela_estimada)||0, estrategia:r.estrategia||'', condicao:r.condicao||'',
+      stage:r.stage||'prospect', statusLead:r.status_lead||'Ativo', motivoPerda:r.motivo_perda||'',
+      history: r.history || [], createdAt:r.created_at, updatedAt:r.updated_at
+    });
+  });
+
+  var salesRes = await sb.from('sales').select('*').order('data',{ascending:false});
   if(salesRes.error) throw salesRes.error;
   state.sales = (salesRes.data||[]).map(function(r){
-    return {
-      id: r.id, data: r.data, cliente: r.cliente, tipo: r.tipo,
-      valorCredito: Number(r.valor_credito), plano: r.plano||"",
-      qtdParcelas: Number(r.qtd_parcelas), grupo: r.grupo||"", cota: r.cota||"",
-      valorParcela: Number(r.valor_parcela)||0, status: r.status,
-      seguroPrestamista: r.seguro_prestamista || "Não"
-    };
+    return normalizeSale({
+      id:r.id, clientId:r.client_id, numero:r.numero||'', data:r.data, cliente:r.cliente,
+      telefone:r.telefone||'', email:r.email||'', tipo:r.tipo, credito:Number(r.credito),
+      plano:r.plano||'100%', qtd:Number(r.qtd), grupo:r.grupo||'', cota:r.cota||'',
+      parcela:Number(r.parcela)||0, formaPagamento:r.forma_pagamento||'Boleto',
+      seguro:r.seguro||'Não', status:r.status||'Emitida', pos:r.pos||''
+    });
   });
 
   var ovRes = await sb.from('receipt_overrides').select('*');
   if(ovRes.error) throw ovRes.error;
   state.receipts = {};
   (ovRes.data||[]).forEach(function(r){
-    state.receipts[receiptKey(r.sale_id, r.parcela)] = { status: r.status, dataRecebido: r.data_recebido };
-  });
-
-  var leadsRes = await sb.from('leads').select('*').order('created_at', {ascending:false});
-  if(leadsRes.error) throw leadsRes.error;
-  state.leads = (leadsRes.data||[]).map(function(r){
-    return {
-      id: r.id, nome: r.nome, telefone: r.telefone||"", email: r.email||"",
-      origem: r.origem||"Outro", tipoInteresse: r.tipo_interesse||"Outro",
-      valorEstimado: Number(r.valor_estimado)||0, status: r.status,
-      proximoFollowup: r.proximo_followup, observacoes: r.observacoes||"", saleId: r.sale_id
-    };
+    state.receipts[receiptKey(r.sale_id, r.parcela)] = { status:r.status, dataRecebido:r.data_recebido };
   });
 }
 
@@ -895,131 +491,84 @@ function setSyncBadge(mode){
   if(!el) return;
   if(mode === 'cloud'){
     el.innerHTML = '<span class="sync-dot sync-dot-on"></span> Sincronizado (Supabase)';
-    el.title = "Os dados ficam salvos no Supabase. Qualquer pessoa com este link e as credenciais corretas vê os mesmos dados.";
   } else if(mode === 'local'){
     el.innerHTML = '<span class="sync-dot sync-dot-off"></span> Salvo só neste navegador';
-    el.title = "O Supabase não foi configurado (ou está indisponível). Os dados ficam guardados apenas neste navegador.";
   } else {
     el.innerHTML = '<span class="sync-dot"></span> Carregando…';
   }
 }
 
-/* Grava uma venda (cria ou atualiza) */
-function persistSale(sale){
+function clientRow(c){
+  return {
+    id:c.id, nome:c.nome, telefone:c.telefone, email:c.email, empresa:c.empresa, cargo:c.cargo,
+    indicador:c.indicador, origem:c.origem, primeiro_contato:c.primeiroContato||null,
+    forma_contato:c.formaContato, resultado_abordagem:c.resultadoAbordagem,
+    ultimo_contato:c.ultimoContato||null, proxima_etapa:c.proximaEtapa, data_proxima_etapa:c.dataProximaEtapa||null,
+    obs:c.obs, temperatura:c.temperatura, interesse:c.interesse, objetivo:c.objetivo,
+    faixa_credito:c.faixaCredito, credito_pretendido:c.creditoPretendido||0, parcela_estimada:c.parcelaEstimada||0,
+    estrategia:c.estrategia, condicao:c.condicao, stage:c.stage, status_lead:c.statusLead,
+    motivo_perda:c.motivoPerda, history:c.history||[], updated_at:new Date().toISOString()
+  };
+}
+function persistClient(c){
+  c.updatedAt = new Date().toISOString();
   if(dbReady){
-    var row = {
-      id: sale.id, data: sale.data, cliente: sale.cliente, tipo: sale.tipo,
-      valor_credito: sale.valorCredito, plano: sale.plano, qtd_parcelas: sale.qtdParcelas,
-      grupo: sale.grupo, cota: sale.cota, valor_parcela: sale.valorParcela, status: sale.status,
-      seguro_prestamista: sale.seguroPrestamista || 'Não'
-    };
-    sb.from('sales').upsert(row).then(function(res){
+    sb.from('clients').upsert(clientRow(c)).then(function(res){
       if(res.error){ console.warn(res.error); showToast("Não foi possível salvar no Supabase."); }
     });
   } else { saveLocal(); }
 }
-function persistDeleteSale(id){
-  if(dbReady){
-    sb.from('sales').delete().eq('id', id).then(function(res){
-      if(res.error) console.warn(res.error);
-    });
-  } else { saveLocal(); }
+function persistDeleteClient(id){
+  if(dbReady){ sb.from('clients').delete().eq('id',id).then(function(res){ if(res.error) console.warn(res.error); }); }
+  else { saveLocal(); }
 }
-/* Grava um lead (cria ou atualiza) */
-function persistLead(lead){
+function saleRow(s){
+  return { id:s.id, client_id:s.clientId, numero:s.numero, data:s.data, cliente:s.cliente,
+    telefone:s.telefone, email:s.email, tipo:s.tipo, credito:s.credito, plano:s.plano, qtd:s.qtd,
+    grupo:s.grupo, cota:s.cota, parcela:s.parcela, forma_pagamento:s.formaPagamento,
+    seguro:s.seguro, status:s.status, pos:s.pos };
+}
+function persistSale(s){
   if(dbReady){
-    var row = {
-      id: lead.id, nome: lead.nome, telefone: lead.telefone, email: lead.email,
-      origem: lead.origem, tipo_interesse: lead.tipoInteresse, valor_estimado: lead.valorEstimado,
-      status: lead.status, proximo_followup: lead.proximoFollowup || null,
-      observacoes: lead.observacoes, sale_id: lead.saleId || null
-    };
-    sb.from('leads').upsert(row).then(function(res){
+    sb.from('sales').upsert(saleRow(s)).then(function(res){
       if(res.error){ console.warn(res.error); showToast("Não foi possível salvar no Supabase."); }
     });
   } else { saveLocal(); }
 }
-function persistDeleteLead(id){
-  if(dbReady){
-    sb.from('leads').delete().eq('id', id).then(function(res){
-      if(res.error) console.warn(res.error);
-    });
-  } else { saveLocal(); }
-}
-/* Grava ou remove UMA parcela específica (mais eficiente que reescrever tudo) */
 function persistReceiptOverride(saleId, parcela, received, dataRecebido){
   if(dbReady){
     if(received){
-      sb.from('receipt_overrides').upsert({
-        sale_id: saleId, parcela: parcela, status: 'recebido', data_recebido: dataRecebido
-      }, {onConflict:'sale_id,parcela'}).then(function(res){
-        if(res.error){ console.warn(res.error); showToast("Não foi possível salvar no Supabase."); }
-      });
+      sb.from('receipt_overrides').upsert({sale_id:saleId, parcela:parcela, status:'recebido', data_recebido:dataRecebido},
+        {onConflict:'sale_id,parcela'}).then(function(res){ if(res.error){ console.warn(res.error); showToast("Não foi possível salvar no Supabase."); } });
     } else {
-      sb.from('receipt_overrides').delete().eq('sale_id', saleId).eq('parcela', parcela).then(function(res){
-        if(res.error) console.warn(res.error);
-      });
+      sb.from('receipt_overrides').delete().eq('sale_id',saleId).eq('parcela',parcela).then(function(res){ if(res.error) console.warn(res.error); });
     }
   } else { saveLocal(); }
 }
 function persistSettings(){
   if(dbReady){
-    sb.from('settings').upsert({id:1, imposto_pct: state.impostoPct}).then(function(res){
-      if(res.error) console.warn(res.error);
-    });
+    sb.from('settings').upsert({id:1, imposto_pct:state.impostoPct, admin:state.admin}).then(function(res){ if(res.error) console.warn(res.error); });
   } else { saveLocal(); }
 }
 
 /* ============================================================
-   REGRA DE COMISSÃO (atualizada)
-
-   COMISSÃO DE 2% — sobre o valor total do crédito, dividida conforme o plano:
-     Planos 100%, 85%, 70%  → dividida igualmente da 1ª à 13ª parcela.
-     Planos 55%, 50%        → dividida igualmente da 1ª à 15ª parcela.
-     (planos legados/desconhecidos caem no padrão de 13 parcelas)
-
-   SEGURO PRESTAMISTA — opcional por venda. Se "Sim": 0,11% do crédito,
-   valor integral pago de uma vez na 14ª parcela. Se "Não": R$ 0,00.
-
-   BONIFICAÇÃO — 0,3% do crédito, sempre na 15ª parcela, para todos os planos.
-
-   COMISSÃO COMPARTILHADA — 0,7% do crédito, sempre a partir da 16ª parcela
-   (nunca antes), dividida igualmente entre a 16ª e a última parcela.
-
-   Os quatro componentes são independentes entre si e nunca se sobrepõem
-   na mesma fórmula (mas podem coexistir na mesma parcela, ex.: a 14ª parcela
-   de um plano 55%/50% recebe a fatia do 2% + o seguro, se contratado).
+   MOTOR DE COMISSÃO (regras preservadas, não alteradas)
 ============================================================ */
-function percent2Range(plano){
-  return (plano==='55%' || plano==='50%') ? 15 : 13;
-}
+function percent2Range(plano){ return (plano==='55%' || plano==='50%') ? 15 : 13; }
 function commissionForInstallment(credito, qtd, p, plano, seguroSim){
   var range = percent2Range(plano);
   var out = { pct2:0, seguro:0, bonificacao:0, compartilhada:0, bruto:0, labels:[] };
-
-  if(p <= range && p <= qtd){
-    out.pct2 = credito * 0.02 / range;
-    out.labels.push("Comissão 2%");
-  }
-  if(p === 14 && seguroSim && qtd >= 14){
-    out.seguro = credito * 0.0011;
-    out.labels.push("Seguro prestamista");
-  }
-  if(p === 15 && qtd >= 15){
-    out.bonificacao = credito * 0.003;
-    out.labels.push("Bonificação 0,3%");
-  }
+  if(p <= range && p <= qtd){ out.pct2 = credito * 0.02 / range; out.labels.push("2%"); }
+  if(p === 14 && seguroSim && qtd >= 14){ out.seguro = credito * 0.0011; out.labels.push("Seguro"); }
+  if(p === 15 && qtd >= 15){ out.bonificacao = credito * 0.003; out.labels.push("Bônus 0,3%"); }
   var compCount = Math.max(qtd - 15, 0);
-  if(p >= 16 && p <= qtd && compCount > 0){
-    out.compartilhada = credito * 0.007 / compCount;
-    out.labels.push("Compartilhada 0,7%");
-  }
+  if(p >= 16 && p <= qtd && compCount > 0){ out.compartilhada = credito * 0.007 / compCount; out.labels.push("Compartilhada 0,7%"); }
   out.bruto = out.pct2 + out.seguro + out.bonificacao + out.compartilhada;
   out.tipo = out.labels.length ? out.labels.join(" + ") : "—";
   return out;
 }
 function totalCommission(credito, qtd, plano, seguroSim){
-  var total = credito * 0.02; // 2% total, sempre, independente de como é dividido
+  var total = credito * 0.02;
   if(seguroSim && qtd >= 14) total += credito * 0.0011;
   if(qtd >= 15) total += credito * 0.003;
   if(qtd >= 16) total += credito * 0.007;
@@ -1028,37 +577,29 @@ function totalCommission(credito, qtd, plano, seguroSim){
 function addMonths(dateStr, n){
   var d = new Date(dateStr + "T00:00:00");
   var day = d.getDate();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + n);
+  d.setDate(1); d.setMonth(d.getMonth()+n);
   var last = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
-  d.setDate(Math.min(day, last));
+  d.setDate(Math.min(day,last));
   return d;
 }
-function receiptKey(saleId, p){ return saleId + "_" + p; }
-function getImpostoFrac(){ return (state.impostoPct || 0) / 100; }
-
-/* Generates the full flattened installment list for a sale, applying stored overrides.
-   Gera uma linha para CADA parcela (1..qtd), mesmo quando a comissão daquela
-   parcela específica é R$ 0,00 — mantém o cronograma completo e sequencial. */
+function receiptKey(saleId,p){ return saleId+"_"+p; }
+function getImpostoFrac(){ return (state.impostoPct||0)/100; }
 function scheduleForSale(sale){
   var rows = [];
-  var qtd = sale.qtdParcelas;
-  var seguroSim = sale.seguroPrestamista === 'Sim';
+  var qtd = sale.qtd;
+  var seguroSim = sale.seguro === 'Sim';
   for(var p=1; p<=qtd; p++){
-    var c = commissionForInstallment(sale.valorCredito, qtd, p, sale.plano, seguroSim);
+    var c = commissionForInstallment(sale.credito, qtd, p, sale.plano, seguroSim);
     var dueDate = addMonths(sale.data, p);
     var key = receiptKey(sale.id, p);
     var ov = state.receipts[key] || {};
     var status = ov.status || "a_receber";
     var imposto = c.bruto * getImpostoFrac();
     var liquido = c.bruto - imposto;
-    rows.push({
-      saleId: sale.id, cliente: sale.cliente, grupo: sale.grupo, cota: sale.cota,
-      credito: sale.valorCredito, plano: sale.plano, parcela: p, dueDate: dueDate,
-      tipo: c.tipo, pct2: c.pct2, seguro: c.seguro, bonificacao: c.bonificacao,
-      compartilhada: c.compartilhada, bruto: c.bruto, imposto: imposto, liquido: liquido,
-      status: status, dataRecebido: ov.dataRecebido || null
-    });
+    rows.push({ saleId:sale.id, cliente:sale.cliente, grupo:sale.grupo, cota:sale.cota,
+      credito:sale.credito, plano:sale.plano, parcela:p, dueDate:dueDate, tipo:c.tipo,
+      pct2:c.pct2, seguro:c.seguro, bonificacao:c.bonificacao, compartilhada:c.compartilhada,
+      bruto:c.bruto, imposto:imposto, liquido:liquido, status:status, dataRecebido:ov.dataRecebido||null });
   }
   return rows;
 }
@@ -1073,906 +614,748 @@ function allReceipts(){
 ============================================================ */
 var fmtBRL = new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'});
 var fmtDate = new Intl.DateTimeFormat('pt-BR');
-var fmtMonth = new Intl.DateTimeFormat('pt-BR', {month:'short', year:'numeric'});
+var MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 function money(v){ return fmtBRL.format(v||0); }
 function dateBR(d){ if(!d) return "—"; return fmtDate.format(d instanceof Date ? d : new Date(d+"T00:00:00")); }
+function todayISO(){ var t=new Date(); return t.toISOString().slice(0,10); }
 function todayMidnight(){ var t=new Date(); t.setHours(0,0,0,0); return t; }
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
-
 function showToast(msg){
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(showToast._tm);
-  showToast._tm = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+  var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(showToast._tm); showToast._tm=setTimeout(function(){t.classList.remove('show');},2400);
 }
 
 /* ============================================================
-   NAVIGATION
+   OPÇÕES DE SELECT (listas ampliadas)
 ============================================================ */
-var views = ['dashboard','leads','vendas','recebimentos'];
-function setView(name){
-  views.forEach(function(v){
-    document.getElementById('view-'+v).classList.toggle('active', v===name);
-  });
-  document.querySelectorAll('.navlink').forEach(function(el){
-    el.classList.toggle('active', el.dataset.view===name);
-  });
-  document.getElementById('sidebar').classList.remove('open');
-  if(name==='dashboard') renderDashboard();
-  if(name==='leads') renderLeads();
-  if(name==='vendas') renderVendas();
-  if(name==='recebimentos') renderRecebimentos();
-}
-document.querySelectorAll('.navlink[data-view]').forEach(function(el){
-  el.addEventListener('click', function(){ setView(el.dataset.view); });
-});
-['menu-toggle-1','menu-toggle-2','menu-toggle-3','menu-toggle-leads'].forEach(function(id){
+var ORIGENS = ['Uber','Indicação','Instagram','WhatsApp','Prospecção ativa','Cliente antigo','Parceiro','Corretor','Evento','Networking','Empresa','Lista de prospecção','Outro'];
+var RESULTADOS_PROSPECT = ['Ainda não contatado','Contato realizado','Respondeu','Sem retorno','Sem interesse no momento','Demonstrou interesse'];
+var PROXIMAS_ETAPAS = ['Fazer primeiro contato','Entender necessidade','Apresentar planejamento','Enviar simulação','Apresentar estratégia','Fazer reunião','Ajustar proposta','Aguardar decisão','Solicitar documentação','Fechar','Pós-venda'];
+var TEMPERATURAS = ['Frio','Morno','Quente','Muito quente'];
+var INTERESSES = ['Imóvel','Veículo','Agro','Negócios','Investimento','Frota','Planejamento financeiro','Outro'];
+var FAIXAS_CREDITO = ['Até R$ 100 mil','R$ 100–250 mil','R$ 250–500 mil','R$ 500 mil–1 milhão','Acima de R$ 1 milhão','Ainda não definido'];
+var MOTIVOS_PERDA = ['Sem interesse','Sem orçamento','Momento inadequado','Comprou de outra forma','Não respondeu','Sem perfil','Projeto cancelado','Adiado','Outro'];
+var PROXIMOS_PASSOS = PROXIMAS_ETAPAS;
+
+function fillSelect(id, options, selected){
   var el = document.getElementById(id);
-  if(el) el.addEventListener('click', function(){ document.getElementById('sidebar').classList.toggle('open'); });
+  if(!el) return;
+  el.innerHTML = options.map(function(o){ return '<option'+(o===selected?' selected':'')+'>'+esc(o)+'</option>'; }).join('');
+  if(selected && options.indexOf(selected)===-1){ el.insertAdjacentHTML('afterbegin','<option selected>'+esc(selected)+'</option>'); }
+}
+function fillAllSelects(){
+  fillSelect('pOrigem', ORIGENS);
+  fillSelect('pResultado', RESULTADOS_PROSPECT);
+  fillSelect('pProximaEtapa', PROXIMAS_ETAPAS);
+  fillSelect('lOrigem', ORIGENS);
+  fillSelect('lTemperatura', TEMPERATURAS);
+  fillSelect('lInteresse', INTERESSES);
+  fillSelect('lFaixaCredito', FAIXAS_CREDITO);
+  fillSelect('lMotivo', MOTIVOS_PERDA);
+  fillSelect('lProximaEtapa', PROXIMAS_ETAPAS);
+  fillSelect('cProximoPasso', PROXIMOS_PASSOS);
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+============================================================ */
+var SECTIONS = ['dashboard','prospects','leads','perdidos','followup','carteira','recebimentos','config'];
+var TITLES = { dashboard:'Dashboard', prospects:'Prospects', leads:'Leads', perdidos:'Leads perdidos',
+  followup:'Follow-up', carteira:'Carteira', recebimentos:'Recebimentos', config:'Configurações' };
+function setView(name){
+  SECTIONS.forEach(function(s){ document.getElementById(s).classList.toggle('active', s===name); });
+  document.querySelectorAll('#nav button').forEach(function(b){ b.classList.toggle('active', b.dataset.target===name); });
+  document.getElementById('pageTitle').textContent = TITLES[name] || name;
+  renderAll();
+}
+document.getElementById('nav').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-target]');
+  if(b) setView(b.dataset.target);
 });
 
 /* ============================================================
-   DASHBOARD
+   DERIVAÇÕES
 ============================================================ */
-var chartInstance = null;
+function prospectsList(){ return state.clients.filter(function(c){ return c.stage==='prospect'; }); }
+function leadsAtivos(){ return state.clients.filter(function(c){ return c.stage==='lead' && c.statusLead!=='Perdido'; }); }
+function leadsPerdidos(){ return state.clients.filter(function(c){ return c.statusLead==='Perdido'; }); }
+function carteiraClientes(){ return state.clients.filter(function(c){ return c.stage==='carteira'; }); }
+function clientById(id){ return state.clients.find(function(c){ return c.id===id; }); }
+function salesByClient(id){ return state.sales.filter(function(s){ return s.clientId===id; }); }
+
+/* ============================================================
+   RENDER: DASHBOARD
+============================================================ */
+function populateAnoSelect(sel, keepValue){
+  var anos = {};
+  state.sales.forEach(function(s){
+    scheduleForSale(s).forEach(function(r){ anos[r.dueDate.getFullYear()] = true; });
+  });
+  anos[new Date().getFullYear()] = true;
+  var list = Object.keys(anos).map(Number).sort();
+  var prev = sel.value;
+  sel.innerHTML = list.map(function(a){ return '<option value="'+a+'">'+a+'</option>'; }).join('');
+  if(keepValue && list.indexOf(Number(prev))>-1) sel.value = prev;
+  else sel.value = String(new Date().getFullYear());
+}
+function populateMesSelect(sel){
+  if(sel.options.length) return;
+  sel.innerHTML = '<option value="">Todos os meses</option>' + MESES.map(function(m,i){ return '<option value="'+i+'">'+m+'</option>'; }).join('');
+}
 
 function renderDashboard(){
-  var sales = state.sales;
-  var receipts = allReceipts();
+  populateAnoSelect(document.getElementById('dashAno'), true);
+  populateMesSelect(document.getElementById('dashMes'));
+  populateAnoSelect(document.getElementById('resumoAno'), true);
 
-  var totalVendas = sales.length;
-  var totalCredito = sales.reduce(function(a,s){return a+s.valorCredito;},0);
-  var totalImovel = sales.filter(function(s){return s.tipo==='Imóvel';}).reduce(function(a,s){return a+s.valorCredito;},0);
-  var totalVeiculo = sales.filter(function(s){return s.tipo==='Veículo';}).reduce(function(a,s){return a+s.valorCredito;},0);
+  var ano = Number(document.getElementById('dashAno').value);
+  var mesStr = document.getElementById('dashMes').value;
+  var mes = mesStr === '' ? null : Number(mesStr);
 
-  var comissaoBruta = sales.reduce(function(a,s){return a+totalCommission(s.valorCredito, s.qtdParcelas, s.plano, s.seguroPrestamista==='Sim');},0);
-  var comissaoRecebidaBruta = receipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.bruto;},0);
-  var comissaoAReceberBruta = comissaoBruta - comissaoRecebidaBruta;
+  var receipts = allReceipts().filter(function(r){
+    if(r.dueDate.getFullYear() !== ano) return false;
+    if(mes !== null && r.dueDate.getMonth() !== mes) return false;
+    return true;
+  });
+
+  var totalVendas = state.sales.length;
+  var totalCredito = state.sales.reduce(function(a,s){return a+s.credito;},0);
+  var totalImovel = state.sales.filter(function(s){return s.tipo==='Imóvel';}).reduce(function(a,s){return a+s.credito;},0);
+  var totalVeiculo = state.sales.filter(function(s){return s.tipo==='Veículo';}).reduce(function(a,s){return a+s.credito;},0);
+
+  var comissaoBruta = receipts.reduce(function(a,r){return a+r.bruto;},0);
+  var comissaoRecebida = receipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.bruto;},0);
+  var comissaoAReceber = comissaoBruta - comissaoRecebida;
   var impostoTotal = receipts.reduce(function(a,r){return a+r.imposto;},0);
   var liquidaPrevista = comissaoBruta - impostoTotal;
   var liquidaRecebida = receipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
   var liquidaAReceber = liquidaPrevista - liquidaRecebida;
 
-  var kpis = [
-    {label:"Vendas cadastradas", value:totalVendas, sub:money(totalCredito)+" em créditos", accent:true, isCount:true},
-    {label:"Créditos em imóveis", value:money(totalImovel), sub:"soma dos créditos vendidos"},
-    {label:"Créditos em veículos", value:money(totalVeiculo), sub:"soma dos créditos vendidos"},
-    {label:"Comissão bruta prevista", value:money(comissaoBruta), sub:"antes do imposto"},
-    {label:"Comissão já recebida", value:money(comissaoRecebidaBruta), sub:"valor bruto"},
-    {label:"Comissão a receber", value:money(comissaoAReceberBruta), sub:"valor bruto"},
-    {label:"Comissão líquida prevista", value:money(liquidaPrevista), sub:"após imposto de "+state.impostoPct+"%"},
-    {label:"Comissão líquida a receber", value:money(liquidaAReceber), sub:money(liquidaRecebida)+" já recebidos líquidos"}
+  var cards = [
+    {l:'Prospects', v:prospectsList().length},
+    {l:'Leads ativos', v:leadsAtivos().length},
+    {l:'Vendas', v:totalVendas},
+    {l:'Clientes na carteira', v:carteiraClientes().length},
+    {l:'Créditos em imóveis', v:money(totalImovel)},
+    {l:'Créditos em veículos', v:money(totalVeiculo)},
+    {l:'Comissão bruta (período)', v:money(comissaoBruta)},
+    {l:'Comissão recebida', v:money(comissaoRecebida)},
+    {l:'Comissão a receber', v:money(comissaoAReceber)},
+    {l:'Imposto do período', v:money(impostoTotal)},
+    {l:'Líquida prevista', v:money(liquidaPrevista)},
+    {l:'Líquida a receber', v:money(liquidaAReceber)}
   ];
-  var grid = document.getElementById('kpi-grid');
-  grid.innerHTML = kpis.map(function(k){
-    return '<div class="kpi-card'+(k.accent?' accent':'')+'">'+
-      '<div class="kpi-label">'+k.label+'</div>'+
-      '<div class="kpi-value num">'+(k.isCount ? k.value : k.value)+'</div>'+
-      '<div class="kpi-sub">'+k.sub+'</div></div>';
+  document.getElementById('dashCards').innerHTML = cards.map(function(k){
+    return '<div class="card metric"><div class="label">'+k.l+'</div><div class="value">'+k.v+'</div></div>';
   }).join('');
 
-  // buckets 30/60/90
+  renderMonthly();
+
   var t0 = todayMidnight();
-  function bucketSum(maxDays){
-    return receipts.filter(function(r){
-      if(r.status!=='a_receber') return false;
-      var d = daysBetween(t0, r.dueDate);
-      return d>=0 && d<=maxDays;
-    }).reduce(function(a,r){return a+r.liquido;},0);
-  }
-  var b30 = bucketSum(30), b60 = bucketSum(60), b90 = bucketSum(90);
-  var totalFuturo = receipts.filter(function(r){return r.status==='a_receber';}).reduce(function(a,r){return a+r.liquido;},0);
-  document.getElementById('buckets').innerHTML =
-    '<div class="bucket"><b>'+money(b30)+'</b><span>30 dias</span></div>'+
-    '<div class="bucket"><b>'+money(b60)+'</b><span>60 dias</span></div>'+
-    '<div class="bucket"><b>'+money(b90)+'</b><span>90 dias</span></div>'+
-    '<div class="bucket"><b>'+money(totalFuturo)+'</b><span>total futuro</span></div>';
+  var upcoming = allReceipts().filter(function(r){ return r.status==='a_receber' && daysBetween(t0,r.dueDate)>=0; })
+    .sort(function(a,b){ return a.dueDate-b.dueDate; }).slice(0,8);
+  var el = document.getElementById('nextReceipts');
+  el.innerHTML = upcoming.length ? upcoming.map(function(r){
+    return '<div class="row space" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>'+esc(r.cliente)+'</b><div class="muted">Parcela '+r.parcela+' · '+dateBR(r.dueDate)+'</div></div><div><b>'+money(r.liquido)+'</b></div></div>';
+  }).join('') : '<div class="empty">Nenhum recebimento futuro em aberto.</div>';
+}
 
-  // upcoming list
-  var upcoming = receipts.filter(function(r){return r.status==='a_receber' && daysBetween(t0,r.dueDate)>=0;})
-    .sort(function(a,b){return a.dueDate-b.dueDate;}).slice(0,7);
-  var listEl = document.getElementById('future-list');
-  if(upcoming.length===0){
-    listEl.innerHTML = '<div class="future-empty">Nenhum recebimento futuro em aberto.</div>';
-  } else {
-    listEl.innerHTML = upcoming.map(function(r){
-      return '<div class="future-row"><div class="future-who"><strong>'+escapeHtml(r.cliente)+'</strong>'+
-        '<span>Parcela '+r.parcela+' · '+dateBR(r.dueDate)+'</span></div>'+
-        '<div class="future-amt num">'+money(r.liquido)+'</div></div>';
-    }).join('');
-  }
-
-  // ---- Filtro Ano/Mês do dashboard ----
-  populateAnoSelect(document.getElementById('dash-filter-ano'));
-  var anoSel = document.getElementById('dash-filter-ano');
-  if(!anoSel.value && anoSel.options.length) anoSel.value = anoSel.options[0].value;
-  var dAno = Number(anoSel.value || new Date().getFullYear());
-  var dMes = document.getElementById('dash-filter-mes').value;
-
-  function kpiCardHtml(label, value, sub){
-    return '<div class="kpi-card"><div class="kpi-label">'+label+'</div>'+
-      '<div class="kpi-value num" style="font-size:21px;">'+value+'</div>'+
-      (sub?'<div class="kpi-sub">'+sub+'</div>':'')+'</div>';
-  }
-
-  var monthPanelWrap = document.getElementById('month-panel-wrap');
-  if(dMes !== ''){
-    var mIdx = Number(dMes);
-    var monthReceipts = receipts.filter(function(r){ return r.dueDate.getFullYear()===dAno && r.dueDate.getMonth()===mIdx; });
-    var mBruta = monthReceipts.reduce(function(a,r){return a+r.bruto;},0);
-    var mImposto = monthReceipts.reduce(function(a,r){return a+r.imposto;},0);
-    var mLiquida = mBruta - mImposto;
-    var mRecebida = monthReceipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
-    var mAReceber = mLiquida - mRecebida;
-    monthPanelWrap.innerHTML = '<div class="panel" style="margin-bottom:14px;">'+
-      '<div class="panel-head"><div><h2>'+MESES_PT[mIdx]+'/'+dAno+'</h2><p>Indicadores de recebimentos previstos para o mês selecionado (data prevista)</p></div></div>'+
-      '<div class="panel-body"><div class="kpi-grid" style="margin-bottom:0;">'+
-        kpiCardHtml("Comissão bruta do mês", money(mBruta))+
-        kpiCardHtml("Imposto do mês", money(mImposto))+
-        kpiCardHtml("Comissão líquida do mês", money(mLiquida))+
-        kpiCardHtml("Já recebida", money(mRecebida))+
-        kpiCardHtml("Ainda a receber", money(mAReceber))+
-      '</div></div></div>';
-  } else {
-    monthPanelWrap.innerHTML = '';
-  }
-
-  // ---- Comissões por mês (ano fechado, Jan-Dez) ----
-  var monthlyRows = MESES_PT.map(function(nomeMes, idx){
-    var creditosVendidos = sales.filter(function(s){
-      var d = new Date(s.data+"T00:00:00");
-      return d.getFullYear()===dAno && d.getMonth()===idx;
-    }).reduce(function(a,s){return a+s.valorCredito;},0);
-    var recs = receipts.filter(function(r){ return r.dueDate.getFullYear()===dAno && r.dueDate.getMonth()===idx; });
-    var bruta = recs.reduce(function(a,r){return a+r.bruto;},0);
-    var imposto = recs.reduce(function(a,r){return a+r.imposto;},0);
-    var liquida = bruta - imposto;
-    var recebida = recs.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
+function renderMonthly(){
+  var ano = Number(document.getElementById('resumoAno').value || new Date().getFullYear());
+  var receipts = allReceipts().filter(function(r){ return r.dueDate.getFullYear()===ano; });
+  var rows = MESES.map(function(nome, i){
+    var mr = receipts.filter(function(r){ return r.dueDate.getMonth()===i; });
+    var credito = 0;
+    state.sales.forEach(function(s){
+      var d = new Date(s.data+'T00:00:00');
+      if(d.getFullYear()===ano && d.getMonth()===i) credito += s.credito;
+    });
+    var bruta = mr.reduce(function(a,r){return a+r.bruto;},0);
+    var imposto = mr.reduce(function(a,r){return a+r.imposto;},0);
+    var liquida = bruta-imposto;
+    var recebida = mr.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
     var aReceber = liquida - recebida;
-    return {mes:nomeMes, creditosVendidos:creditosVendidos, bruta:bruta, imposto:imposto, liquida:liquida, recebida:recebida, aReceber:aReceber};
+    return '<tr><td>'+nome+'</td><td>'+money(credito)+'</td><td>'+money(bruta)+'</td><td>'+money(imposto)+'</td><td>'+money(liquida)+'</td><td>'+money(recebida)+'</td><td>'+money(aReceber)+'</td></tr>';
   });
-
-  var mtable = document.getElementById('monthly-table');
-  mtable.innerHTML = '<thead><tr><th>Mês</th><th class="num">Créditos vendidos</th>'+
-    '<th class="num">Comissão bruta</th><th class="num">Imposto</th><th class="num">Comissão líquida</th>'+
-    '<th class="num">Recebida</th><th class="num">A receber</th></tr></thead><tbody>'+
-    monthlyRows.map(function(m){
-      return '<tr><td>'+m.mes+'</td><td class="num">'+money(m.creditosVendidos)+'</td>'+
-        '<td class="num">'+money(m.bruta)+'</td><td class="num">'+money(m.imposto)+'</td>'+
-        '<td class="num">'+money(m.liquida)+'</td><td class="num">'+money(m.recebida)+'</td>'+
-        '<td class="num">'+money(m.aReceber)+'</td></tr>';
-    }).join('') + '</tbody>';
-
-  var labels = monthlyRows.map(function(m){ return m.mes.slice(0,3)+"/"+String(dAno).slice(2); });
-  var recebidoData = monthlyRows.map(function(m){ return Math.round(m.recebida*100)/100; });
-  var aReceberData = monthlyRows.map(function(m){ return Math.round(m.aReceber*100)/100; });
-
-  var css = getComputedStyle(document.documentElement);
-  var greenColor = css.getPropertyValue('--green').trim();
-  var goldColor = css.getPropertyValue('--gold').trim();
-  var inkColor = css.getPropertyValue('--ink-soft').trim();
-  var lineColor = css.getPropertyValue('--line').trim();
-
-  var ctx = document.getElementById('chart-mensal').getContext('2d');
-  if(chartInstance) chartInstance.destroy();
-  if(sales.length===0){
-    chartInstance = null;
-    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
-  } else {
-    chartInstance = new Chart(ctx, {
-      type:'bar',
-      data:{ labels:labels, datasets:[
-        {label:'Recebida', data:recebidoData, backgroundColor:greenColor, borderRadius:3, maxBarThickness:22},
-        {label:'A receber', data:aReceberData, backgroundColor:goldColor, borderRadius:3, maxBarThickness:22}
-      ]},
-      options:{
-        responsive:true,
-        plugins:{ legend:{labels:{color:inkColor, font:{family:"IBM Plex Sans", size:11}}} },
-        scales:{
-          x:{ ticks:{color:inkColor, font:{size:10.5}}, grid:{display:false} },
-          y:{ ticks:{color:inkColor, font:{size:10.5}, callback:function(v){return 'R$ '+(v/1000).toLocaleString('pt-BR')+'k';}}, grid:{color:lineColor} }
-        }
-      }
-    });
-  }
-
-  document.getElementById('nav-count-vendas').textContent = sales.length;
-  document.getElementById('nav-count-receb').textContent = receipts.filter(function(r){return r.status==='a_receber';}).length;
-  updateLeadsNavCount();
-}
-['dash-filter-ano','dash-filter-mes'].forEach(function(id){
-  document.getElementById(id).addEventListener('change', renderDashboard);
-});
-
-function updateLeadsNavCount(){
-  var t0 = todayMidnight();
-  var due = state.leads.filter(function(l){
-    if(l.status==='Convertido' || l.status==='Perdido') return false;
-    if(!l.proximoFollowup) return false;
-    return daysBetween(t0, new Date(l.proximoFollowup+"T00:00:00")) <= 0;
-  }).length;
-  var el = document.getElementById('nav-count-leads');
-  el.textContent = due>0 ? due : state.leads.length;
-  el.classList.toggle('warn', due>0);
-}
-
-function escapeHtml(s){
-  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-  });
+  document.getElementById('monthlyBody').innerHTML = rows.join('');
 }
 
 /* ============================================================
-   LEADS (CRM) — kanban por etapa do funil
+   RENDER: PROSPECTS
 ============================================================ */
-var LEAD_STAGES = ['Novo lead','Contato iniciado','Proposta enviada','Em negociação','Convertido','Perdido'];
-var pendingLeadConversion = null; // id do lead sendo convertido em venda
-
-function leadFollowupInfo(l){
-  if(l.status==='Convertido' || l.status==='Perdido') return {cls:'done', text: l.status==='Convertido' ? 'Convertido' : 'Perdido'};
-  if(!l.proximoFollowup) return {cls:'', text:'Sem data definida'};
-  var t0 = todayMidnight();
-  var d = daysBetween(t0, new Date(l.proximoFollowup+"T00:00:00"));
-  if(d < 0) return {cls:'late', text:'Atrasado · '+dateBR(l.proximoFollowup)};
-  if(d === 0) return {cls:'today', text:'Hoje · '+dateBR(l.proximoFollowup)};
-  return {cls:'', text:dateBR(l.proximoFollowup)};
+function badgeResultado(r){
+  var cls = 'novo';
+  if(r==='Demonstrou interesse') cls='fechado';
+  else if(r==='Sem interesse no momento' || r==='Sem retorno') cls='perdido';
+  else if(r==='Respondeu' || r==='Contato realizado') cls='andamento';
+  return '<span class="badge '+cls+'">'+esc(r)+'</span>';
+}
+function renderProspects(){
+  var q = (document.getElementById('prospectSearch').value||'').toLowerCase();
+  var list = prospectsList().filter(function(c){
+    return !q || (c.nome+' '+c.telefone).toLowerCase().indexOf(q)>-1;
+  });
+  var body = document.getElementById('prospectBody');
+  if(!list.length){ body.innerHTML = '<tr><td colspan="10" class="empty">Nenhum prospect cadastrado.</td></tr>'; return; }
+  body.innerHTML = list.map(function(c){
+    return '<tr><td>'+esc(c.nome)+'</td><td>'+esc(c.telefone)+'</td><td>'+esc(c.empresa)+'</td><td>'+esc(c.origem)+'</td><td>'+esc(c.indicador)+'</td>'+
+      '<td>'+dateBR(c.primeiroContato)+'</td><td>'+badgeResultado(c.resultadoAbordagem)+'</td><td>'+esc(c.proximaEtapa)+'</td><td>'+dateBR(c.dataProximaEtapa)+'</td>'+
+      '<td><button class="btn sm" onclick="openProspect(\''+c.id+'\')">Abrir</button> <button class="btn sm danger" onclick="deleteClient(\''+c.id+'\')">Excluir</button></td></tr>';
+  }).join('');
 }
 
+/* ============================================================
+   RENDER: LEADS
+============================================================ */
+function badgeTemp(t){
+  var map = {Frio:'frio', Morno:'morno', Quente:'quente', 'Muito quente':'muitoquente'};
+  return '<span class="badge '+(map[t]||'frio')+'">'+esc(t)+'</span>';
+}
 function renderLeads(){
-  var t0 = todayMidnight();
-  var due = state.leads.filter(function(l){
-    if(l.status==='Convertido' || l.status==='Perdido') return false;
-    if(!l.proximoFollowup) return false;
-    return daysBetween(t0, new Date(l.proximoFollowup+"T00:00:00")) <= 0;
+  var q = (document.getElementById('leadSearch').value||'').toLowerCase();
+  var list = leadsAtivos().filter(function(c){
+    return !q || (c.nome+' '+c.telefone).toLowerCase().indexOf(q)>-1;
   });
-  var lateCount = due.filter(function(l){ return daysBetween(t0, new Date(l.proximoFollowup+"T00:00:00")) < 0; }).length;
-  var bannerWrap = document.getElementById('followup-banner-wrap');
-  if(due.length===0){
-    bannerWrap.innerHTML = '';
-  } else {
-    var names = due.slice(0,3).map(function(l){return escapeHtml(l.nome);}).join(', ');
-    var extra = due.length>3 ? ' e mais '+(due.length-3) : '';
-    bannerWrap.innerHTML = '<div class="followup-banner'+(lateCount>0?' danger':'')+'">'+
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>'+
-      '<span>'+due.length+' follow-up(s) para hoje ou atrasado(s): '+names+extra+'</span></div>';
-  }
-
-  var kanban = document.getElementById('leads-kanban');
-  kanban.innerHTML = LEAD_STAGES.map(function(stage){
-    var items = state.leads.filter(function(l){ return l.status===stage; });
-    var cards = items.length===0
-      ? '<div class="kanban-empty">Vazio</div>'
-      : items.map(function(l){
-          var fu = leadFollowupInfo(l);
-          return '<div class="lead-card" data-open="'+l.id+'">'+
-            '<strong>'+escapeHtml(l.nome)+'</strong>'+
-            '<div class="lead-meta">'+escapeHtml(l.tipoInteresse)+' · '+escapeHtml(l.origem)+(l.telefone?' · '+escapeHtml(l.telefone):'')+'</div>'+
-            (l.valorEstimado>0 ? '<div class="lead-value">'+money(l.valorEstimado)+'</div>' : '')+
-            '<span class="lead-followup '+fu.cls+'">'+fu.text+'</span>'+
-            '<div class="lead-actions">'+
-              (stage!=='Convertido' && stage!=='Perdido' ? '<button class="btn btn-ghost btn-sm" data-followup="'+l.id+'">Registrar contato</button>' : '')+
-              (stage!=='Convertido' ? '<button class="btn btn-ghost btn-sm" data-convert="'+l.id+'">Converter</button>' : '')+
-            '</div>'+
-          '</div>';
-        }).join('');
-    return '<div class="kanban-col">'+
-      '<div class="kanban-col-head"><h3>'+stage+'</h3><span class="kanban-col-count">'+items.length+'</span></div>'+
-      '<div class="kanban-cards">'+cards+'</div>'+
-    '</div>';
+  var body = document.getElementById('leadBody');
+  if(!list.length){ body.innerHTML = '<tr><td colspan="9" class="empty">Nenhum lead ativo.</td></tr>'; return; }
+  body.innerHTML = list.map(function(c){
+    return '<tr><td>'+esc(c.nome)+'</td><td>'+esc(c.telefone)+'</td><td>'+esc(c.origem)+'</td><td>'+esc(c.interesse)+'</td>'+
+      '<td>'+money(c.creditoPretendido)+'</td><td>'+badgeTemp(c.temperatura)+'</td><td>'+esc(c.proximaEtapa)+'</td><td>'+dateBR(c.dataProximaEtapa)+'</td>'+
+      '<td><button class="btn sm" onclick="openLead(\''+c.id+'\')">Abrir</button></td></tr>';
   }).join('');
-
-  kanban.querySelectorAll('[data-open]').forEach(function(card){
-    card.addEventListener('click', function(e){
-      if(e.target.closest('button')) return;
-      openLeadModal(card.dataset.open);
-    });
-  });
-  kanban.querySelectorAll('[data-followup]').forEach(function(b){
-    b.addEventListener('click', function(e){ e.stopPropagation(); registrarContato(b.dataset.followup); });
-  });
-  kanban.querySelectorAll('[data-convert]').forEach(function(b){
-    b.addEventListener('click', function(e){ e.stopPropagation(); converterEmVenda(b.dataset.convert); });
-  });
 }
 
-var editingLeadId = null;
-var modalLeadEl = document.getElementById('modal-lead');
-function openLeadModal(id){
-  editingLeadId = id || null;
-  document.getElementById('modal-lead-title').textContent = id ? "Editar lead" : "Novo lead";
-  document.getElementById('modal-lead-delete').style.display = id ? '' : 'none';
-  if(id){
-    var l = state.leads.find(function(x){return x.id===id;});
-    document.getElementById('l-nome').value = l.nome;
-    document.getElementById('l-telefone').value = l.telefone||"";
-    document.getElementById('l-email').value = l.email||"";
-    document.getElementById('l-origem').value = l.origem||"Outro";
-    document.getElementById('l-tipo').value = l.tipoInteresse||"Outro";
-    document.getElementById('l-valor').value = l.valorEstimado||"";
-    document.getElementById('l-status').value = l.status;
-    document.getElementById('l-followup').value = l.proximoFollowup||"";
-    document.getElementById('l-obs').value = l.observacoes||"";
-  } else {
-    document.getElementById('form-lead').reset();
-    document.getElementById('l-status').value = 'Novo lead';
-  }
-  modalLeadEl.classList.add('open');
-  setTimeout(function(){ document.getElementById('l-nome').focus(); }, 50);
-}
-function closeLeadModal(){ modalLeadEl.classList.remove('open'); editingLeadId = null; }
-document.getElementById('btn-novo-lead').addEventListener('click', function(){ openLeadModal(null); });
-document.getElementById('modal-lead-close').addEventListener('click', closeLeadModal);
-document.getElementById('modal-lead-cancel').addEventListener('click', closeLeadModal);
-modalLeadEl.addEventListener('click', function(e){ if(e.target===modalLeadEl) closeLeadModal(); });
-
-document.getElementById('modal-lead-save').addEventListener('click', function(){
-  var nome = document.getElementById('l-nome').value.trim();
-  if(!nome){ showToast("Preencha o nome do lead."); return; }
-  var payload = {
-    nome: nome,
-    telefone: document.getElementById('l-telefone').value.trim(),
-    email: document.getElementById('l-email').value.trim(),
-    origem: document.getElementById('l-origem').value,
-    tipoInteresse: document.getElementById('l-tipo').value,
-    valorEstimado: Number(document.getElementById('l-valor').value)||0,
-    status: document.getElementById('l-status').value,
-    proximoFollowup: document.getElementById('l-followup').value || null,
-    observacoes: document.getElementById('l-obs').value
-  };
-  if(editingLeadId){
-    var idx = state.leads.findIndex(function(l){return l.id===editingLeadId;});
-    payload.saleId = state.leads[idx].saleId || null;
-    state.leads[idx] = Object.assign(state.leads[idx], payload);
-    persistLead(state.leads[idx]);
-    showToast("Lead atualizado.");
-  } else {
-    payload.id = uid();
-    payload.saleId = null;
-    state.leads.unshift(payload);
-    persistLead(payload);
-    showToast("Lead cadastrado.");
-  }
-  closeLeadModal();
-  renderLeads(); renderDashboard();
-});
-document.getElementById('modal-lead-delete').addEventListener('click', function(){
-  if(!editingLeadId) return;
-  if(!confirm("Excluir este lead?")) return;
-  var id = editingLeadId;
-  state.leads = state.leads.filter(function(l){return l.id!==id;});
-  persistDeleteLead(id);
-  closeLeadModal();
-  renderLeads(); renderDashboard();
-  showToast("Lead excluído.");
-});
-
-/* Registrar contato: anota a data de hoje nas observações e pede a próxima data de follow-up */
-function registrarContato(id){
-  var l = state.leads.find(function(x){return x.id===id;});
-  if(!l) return;
-  var nota = prompt("O que foi conversado com "+l.nome+"? (fica registrado no histórico)", "");
-  if(nota===null) return;
-  var hoje = new Date().toISOString().slice(0,10);
-  var linha = "["+dateBR(hoje)+"] "+nota;
-  l.observacoes = l.observacoes ? (linha+"\n"+l.observacoes) : linha;
-  var prox = prompt("Data do próximo follow-up (AAAA-MM-DD), ou deixe em branco para não agendar:", l.proximoFollowup||"");
-  if(prox!==null && prox.trim()!==""){ l.proximoFollowup = prox.trim(); }
-  if(l.status==='Novo lead') l.status = 'Contato iniciado';
-  persistLead(l);
-  renderLeads(); renderDashboard();
-  showToast("Contato registrado.");
-}
-
-/* Converter lead em venda: abre o modal de Nova venda já preenchido */
-function converterEmVenda(id){
-  var l = state.leads.find(function(x){return x.id===id;});
-  if(!l) return;
-  pendingLeadConversion = id;
-  openVendaModal(null);
-  document.getElementById('f-cliente').value = l.nome;
-  document.getElementById('f-tipo').value = (l.tipoInteresse==='Imóvel'||l.tipoInteresse==='Veículo') ? l.tipoInteresse : 'Outro';
-  if(l.valorEstimado>0) document.getElementById('f-credito').value = l.valorEstimado;
-  updatePreview();
+function renderLost(){
+  var list = leadsPerdidos();
+  var body = document.getElementById('lostBody');
+  if(!list.length){ body.innerHTML = '<tr><td colspan="7" class="empty">Nenhum lead perdido.</td></tr>'; return; }
+  body.innerHTML = list.map(function(c){
+    return '<tr><td>'+esc(c.nome)+'</td><td>'+esc(c.telefone)+'</td><td>'+esc(c.origem)+'</td><td>'+esc(c.interesse)+'</td>'+
+      '<td>'+money(c.creditoPretendido)+'</td><td>'+dateBR(c.dataProximaEtapa||c.ultimoContato)+'</td><td>'+esc(c.motivoPerda)+'</td>'+
+      '<td><button class="btn sm" onclick="openLead(\''+c.id+'\')">Abrir</button></td></tr>';
+  }).join('');
 }
 
 /* ============================================================
-   VENDAS TABLE
+   RENDER: FOLLOW-UP (prospects + leads juntos)
 ============================================================ */
-function renderVendas(){
-  var search = (document.getElementById('vendas-search').value||"").toLowerCase();
-  var fTipo = document.getElementById('vendas-filter-tipo').value;
-  var fStatus = document.getElementById('vendas-filter-status').value;
-
-  var rows = state.sales.filter(function(s){
-    if(fTipo && s.tipo!==fTipo) return false;
-    if(fStatus && s.status!==fStatus) return false;
-    if(search){
-      var hay = (s.cliente+" "+s.grupo+" "+s.cota).toLowerCase();
-      if(hay.indexOf(search)===-1) return false;
-    }
-    return true;
-  }).sort(function(a,b){ return b.id - a.id; });
-
-  var wrap = document.getElementById('vendas-table-wrap');
-  if(state.sales.length===0){
-    wrap.innerHTML = emptyState("Nenhuma venda cadastrada", "Clique em “Nova venda” para começar a cadastrar sua carteira de consórcios.");
-    return;
+function renderFollowup(){
+  var people = state.clients.filter(function(c){ return (c.stage==='prospect' || c.stage==='lead') && c.statusLead!=='Perdido'; });
+  var t0 = todayMidnight();
+  var cols = { atrasado:[], hoje:[], futuro:[], semdata:[] };
+  people.forEach(function(c){
+    var dt = c.dataProximaEtapa;
+    if(!dt){ cols.semdata.push(c); return; }
+    var d = daysBetween(t0, new Date(dt+'T00:00:00'));
+    if(d<0) cols.atrasado.push(c);
+    else if(d===0) cols.hoje.push(c);
+    else cols.futuro.push(c);
+  });
+  var alertEl = document.getElementById('followAlert');
+  alertEl.innerHTML = cols.atrasado.length ? '<div class="alert">⚠ '+cols.atrasado.length+' follow-up(s) atrasado(s) precisam de atenção.</div>' : '';
+  function colHtml(title, arr, cls){
+    return '<div class="column"><h3>'+title+' ('+arr.length+')</h3>'+
+      (arr.length ? arr.map(function(c){
+        return '<div class="lead-card"><strong>'+esc(c.nome)+'</strong><div class="tiny">'+(c.stage==='prospect'?'Prospect':'Lead')+' · '+esc(c.proximaEtapa||'—')+'</div>'+
+          '<div class="tiny">'+dateBR(c.dataProximaEtapa)+'</div>'+
+          '<div class="row" style="margin-top:8px"><button class="btn sm" onclick="'+(c.stage==='prospect'?'openProspect':'openLead')+'(\''+c.id+'\')">Abrir</button></div></div>';
+      }).join('') : '<div class="empty">Vazio</div>');
   }
-  if(rows.length===0){
-    wrap.innerHTML = emptyState("Nada encontrado", "Ajuste a busca ou os filtros para ver suas vendas.");
-    return;
-  }
-
-  var receiptsBySale = {};
-  rows.forEach(function(s){ receiptsBySale[s.id] = scheduleForSale(s); });
-
-  var thead = '<thead><tr>'+
-    '<th>Nº</th><th>Data</th><th>Cliente</th><th>Bem</th><th class="num">Crédito</th>'+
-    '<th>Plano</th><th class="num">Parcelas</th><th>Seguro</th><th class="num">Comissão prevista</th><th class="num">Recebida</th>'+
-    '<th class="num">A receber</th><th>Status</th><th></th></tr></thead>';
-
-  var body = rows.map(function(s, idx){
-    var rec = receiptsBySale[s.id];
-    var total = totalCommission(s.valorCredito, s.qtdParcelas, s.plano, s.seguroPrestamista==='Sim');
-    var recebida = rec.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.bruto;},0);
-    var aReceber = total - recebida;
-    return '<tr>'+
-      '<td class="num">'+(rows.length-idx)+'</td>'+
-      '<td>'+dateBR(s.data)+'</td>'+
-      '<td class="wrap">'+escapeHtml(s.cliente)+'</td>'+
-      '<td>'+escapeHtml(s.tipo)+'</td>'+
-      '<td class="num">'+money(s.valorCredito)+'</td>'+
-      '<td>'+escapeHtml(s.plano||'—')+'</td>'+
-      '<td class="num">'+s.qtdParcelas+'</td>'+
-      '<td>'+(s.seguroPrestamista==='Sim' ? '<span class="badge badge-green">Sim</span>' : '<span class="badge badge-muted">Não</span>')+'</td>'+
-      '<td class="num">'+money(total)+'</td>'+
-      '<td class="num">'+money(recebida)+'</td>'+
-      '<td class="num">'+money(aReceber)+'</td>'+
-      '<td>'+statusBadge(s.status)+'</td>'+
-      '<td><div class="rowactions">'+
-        '<button class="btn-icon" data-edit="'+s.id+'" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'+
-        '<button class="btn-icon" data-del="'+s.id+'" title="Excluir"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button>'+
-      '</div></td></tr>';
-  }).join('');
-
-  wrap.innerHTML = '<div class="table-scroll"><table>'+thead+'<tbody>'+body+'</tbody></table></div>';
-
-  wrap.querySelectorAll('[data-edit]').forEach(function(b){
-    b.addEventListener('click', function(){ openVendaModal(b.dataset.edit); });
-  });
-  wrap.querySelectorAll('[data-del]').forEach(function(b){
-    b.addEventListener('click', function(){ deleteSale(b.dataset.del); });
-  });
-}
-function statusBadge(status){
-  if(status==='Concluída') return '<span class="badge badge-green">Concluída</span>';
-  if(status==='Cancelada') return '<span class="badge badge-red">Cancelada</span>';
-  return '<span class="badge badge-gold">Em andamento</span>';
-}
-function emptyState(title, msg){
-  return '<div class="empty-state"><h3>'+title+'</h3><p>'+msg+'</p></div>';
-}
-
-['vendas-search','vendas-filter-tipo','vendas-filter-status'].forEach(function(id){
-  document.getElementById(id).addEventListener('input', renderVendas);
-  document.getElementById(id).addEventListener('change', renderVendas);
-});
-
-function deleteSale(id){
-  if(!confirm("Excluir esta venda e todo o seu cronograma de recebimento?")) return;
-  state.sales = state.sales.filter(function(s){return s.id!==id;});
-  Object.keys(state.receipts).forEach(function(k){
-    if(k.indexOf(id+"_")===0) delete state.receipts[k];
-  });
-  persistDeleteSale(id); // ON DELETE CASCADE remove as parcelas relacionadas no Supabase
-  renderVendas(); renderDashboard(); renderRecebimentos();
-  showToast("Venda excluída.");
+  document.getElementById('followKanban').innerHTML =
+    colHtml('Atrasados', cols.atrasado) + colHtml('Hoje', cols.hoje) + colHtml('Próximos', cols.futuro) + colHtml('Sem data', cols.semdata);
 }
 
 /* ============================================================
-   RECEBIMENTOS TABLE (paginated)
+   RENDER: CARTEIRA
 ============================================================ */
-var rPage = 1, rPageSize = 40;
-var MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-function populateAnoSelect(selectEl, extraYears){
-  var years = {};
-  allReceipts().forEach(function(r){ years[r.dueDate.getFullYear()] = true; });
-  (extraYears||[]).forEach(function(y){ years[y] = true; });
-  years[new Date().getFullYear()] = true;
-  var sorted = Object.keys(years).map(Number).sort(function(a,b){return a-b;});
-  var current = selectEl.value;
-  var placeholder = selectEl.querySelector('option[value=""]');
-  selectEl.innerHTML = '';
-  if(placeholder) selectEl.appendChild(placeholder);
-  sorted.forEach(function(y){
-    var opt = document.createElement('option');
-    opt.value = y; opt.textContent = y;
-    selectEl.appendChild(opt);
-  });
-  if(sorted.indexOf(Number(current))!==-1) selectEl.value = current;
-}
-
-function renderRecebimentos(){
-  populateAnoSelect(document.getElementById('receb-filter-ano'));
-
-  var search = (document.getElementById('receb-search').value||"").toLowerCase();
-  var fStatus = document.getElementById('receb-filter-status').value;
-  var fPeriodo = document.getElementById('receb-filter-periodo').value;
-  var fAno = document.getElementById('receb-filter-ano').value;
-  var fMes = document.getElementById('receb-filter-mes').value;
-  var mesAtivo = fMes !== '';
-  document.getElementById('receb-filter-periodo').disabled = mesAtivo;
-  var t0 = todayMidnight();
-
-  var all = allReceipts().map(function(r){
-    var effStatus = r.status;
-    if(effStatus==='a_receber' && daysBetween(t0, r.dueDate) < 0) effStatus = 'atrasado';
-    return Object.assign({}, r, {effStatus:effStatus});
-  });
-
-  var rows = all.filter(function(r){
-    if(fStatus && r.effStatus!==fStatus) return false;
-    if(mesAtivo){
-      var ano = fAno ? Number(fAno) : new Date().getFullYear();
-      if(r.dueDate.getFullYear()!==ano || r.dueDate.getMonth()!==Number(fMes)) return false;
-    } else if(fPeriodo){
-      var d = daysBetween(t0, r.dueDate);
-      if(!(d>=0 && d<=Number(fPeriodo))) return false;
-    }
-    if(search){
-      var hay = (r.cliente+" "+r.grupo+" "+r.cota).toLowerCase();
-      if(hay.indexOf(search)===-1) return false;
-    }
-    return true;
-  }).sort(function(a,b){ return a.dueDate - b.dueDate; });
-
-  var wrap = document.getElementById('receb-table-wrap');
-  if(state.sales.length===0){
-    wrap.innerHTML = emptyState("Nenhum recebimento ainda", "Cadastre uma venda para gerar o cronograma automaticamente.");
-    return;
-  }
-  if(rows.length===0){
-    wrap.innerHTML = emptyState("Nada encontrado", "Ajuste a busca ou os filtros para ver os recebimentos.");
-    return;
-  }
-
-  var totalPages = Math.max(1, Math.ceil(rows.length / rPageSize));
-  if(rPage>totalPages) rPage = totalPages;
-  var pageRows = rows.slice((rPage-1)*rPageSize, rPage*rPageSize);
-
-  var somaBruto = rows.reduce(function(a,r){return a+r.bruto;},0);
-  var somaLiquido = rows.reduce(function(a,r){return a+r.liquido;},0);
-  var filtroLabel = mesAtivo ? (MESES_PT[Number(fMes)]+'/'+(fAno||new Date().getFullYear())) : null;
-
-  var thead = '<thead><tr>'+
-    '<th>Cliente</th><th>Grupo/Cota</th><th>Plano</th><th class="num">Parcela</th><th>Data prevista</th>'+
-    '<th class="num">2%</th><th class="num">Compart. 0,7%</th><th class="num">Seguro 0,11%</th><th class="num">Bonif. 0,3%</th>'+
-    '<th class="num">Bruto</th><th class="num">Imposto</th><th class="num">Líquido</th>'+
-    '<th>Status</th><th></th></tr></thead>';
-
-  var body = pageRows.map(function(r){
-    var badge = r.effStatus==='recebido' ? '<span class="badge badge-green">Recebido</span>'
-      : r.effStatus==='atrasado' ? '<span class="badge badge-red">Atrasado</span>'
-      : '<span class="badge badge-gold">A receber</span>';
-    var action = r.status==='recebido'
-      ? '<button class="btn btn-ghost btn-sm" data-unreceive="'+r.saleId+'_'+r.parcela+'">Desfazer</button>'
-      : '<button class="btn btn-ghost btn-sm" data-receive="'+r.saleId+'_'+r.parcela+'">Marcar recebido</button>';
-    return '<tr title="'+escapeHtml(r.tipo)+'">'+
-      '<td class="wrap">'+escapeHtml(r.cliente)+'</td>'+
-      '<td>'+escapeHtml(r.grupo||'—')+' / '+escapeHtml(r.cota||'—')+'</td>'+
-      '<td>'+escapeHtml(r.plano||'—')+'</td>'+
-      '<td class="num">'+r.parcela+'</td>'+
-      '<td>'+dateBR(r.dueDate)+'</td>'+
-      '<td class="num">'+(r.pct2>0?money(r.pct2):'—')+'</td>'+
-      '<td class="num">'+(r.compartilhada>0?money(r.compartilhada):'—')+'</td>'+
-      '<td class="num">'+(r.seguro>0?money(r.seguro):'—')+'</td>'+
-      '<td class="num">'+(r.bonificacao>0?money(r.bonificacao):'—')+'</td>'+
-      '<td class="num">'+money(r.bruto)+'</td>'+
-      '<td class="num">'+money(r.imposto)+'</td>'+
-      '<td class="num">'+money(r.liquido)+'</td>'+
-      '<td>'+badge+(r.dataRecebido? '<div style="font-size:12px;color:var(--ink-faint);margin-top:3px;">'+dateBR(r.dataRecebido)+'</div>':'')+'</td>'+
-      '<td>'+action+'</td>'+
-      '</tr>';
+function renderWallet(){
+  var q = (document.getElementById('walletSearch').value||'').toLowerCase();
+  var sales = state.sales.filter(function(s){
+    return !q || (s.cliente+' '+s.grupo+' '+s.cota).toLowerCase().indexOf(q)>-1;
+  }).sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); });
+  var body = document.getElementById('walletBody');
+  if(!sales.length){ body.innerHTML = '<tr><td colspan="15" class="empty">Nenhuma venda registrada.</td></tr>'; return; }
+  body.innerHTML = sales.map(function(s){
+    var sched = scheduleForSale(s);
+    var prevista = sched.reduce(function(a,r){return a+r.liquido;},0);
+    var recebida = sched.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
+    var aReceber = prevista - recebida;
+    return '<tr><td>'+esc(s.numero)+'</td><td>'+dateBR(s.data)+'</td><td>'+esc(s.cliente)+'</td><td>'+esc(s.tipo)+'</td><td>'+money(s.credito)+'</td>'+
+      '<td>'+esc(s.plano)+'</td><td>'+s.qtd+'</td><td>'+esc(s.grupo)+'/'+esc(s.cota)+'</td><td>'+esc(s.seguro)+'</td>'+
+      '<td>'+money(prevista)+'</td><td>'+money(recebida)+'</td><td>'+money(aReceber)+'</td><td><span class="badge andamento">'+esc(s.status)+'</span></td><td>'+esc(s.pos)+'</td>'+
+      '<td><button class="btn sm danger" onclick="deleteSale(\''+s.id+'\')">Excluir</button></td></tr>';
   }).join('');
-
-  var resumoFiltro = filtroLabel
-    ? '<div class="pagination" style="border-top:none;border-bottom:1px solid var(--line-soft);">'+
-        '<span><strong>'+filtroLabel+'</strong> · '+rows.length+' parcela(s) · bruto '+money(somaBruto)+' · líquido '+money(somaLiquido)+'</span></div>'
-    : '';
-
-  var pag = '<div class="pagination"><span>'+rows.length+' recebimento(s) · página '+rPage+' de '+totalPages+'</span>'+
-    '<div class="pg-btns"><button id="rp-prev" '+(rPage<=1?'disabled':'')+'>Anterior</button>'+
-    '<button id="rp-next" '+(rPage>=totalPages?'disabled':'')+'>Próxima</button></div></div>';
-
-  wrap.innerHTML = '<div class="table-scroll">'+resumoFiltro+'<table>'+thead+'<tbody>'+body+'</tbody></table></div>'+pag;
-
-  wrap.querySelectorAll('[data-receive]').forEach(function(b){
-    b.addEventListener('click', function(){ setReceived(b.dataset.receive, true); });
-  });
-  wrap.querySelectorAll('[data-unreceive]').forEach(function(b){
-    b.addEventListener('click', function(){ setReceived(b.dataset.unreceive, false); });
-  });
-  var prevBtn = document.getElementById('rp-prev'), nextBtn = document.getElementById('rp-next');
-  if(prevBtn) prevBtn.addEventListener('click', function(){ rPage--; renderRecebimentos(); });
-  if(nextBtn) nextBtn.addEventListener('click', function(){ rPage++; renderRecebimentos(); });
 }
-function setReceived(key, received){
-  if(!state.receipts[key]) state.receipts[key] = {};
-  var sep = key.lastIndexOf('_');
-  var saleId = key.slice(0, sep);
-  var parcela = Number(key.slice(sep+1));
-  var dataRecebido = null;
-  if(received){
-    dataRecebido = new Date().toISOString().slice(0,10);
-    state.receipts[key].status = 'recebido';
-    state.receipts[key].dataRecebido = dataRecebido;
-  } else {
+
+/* ============================================================
+   RENDER: RECEBIMENTOS
+============================================================ */
+function renderReceipts(){
+  populateAnoSelect(document.getElementById('recAno'), true);
+  populateMesSelect(document.getElementById('recMes'));
+  var ano = Number(document.getElementById('recAno').value);
+  var mesStr = document.getElementById('recMes').value;
+  var mes = mesStr==='' ? null : Number(mesStr);
+  var statusSel = document.getElementById('recStatus').value;
+
+  var receipts = allReceipts().filter(function(r){
+    if(r.dueDate.getFullYear()!==ano) return false;
+    if(mes!==null && r.dueDate.getMonth()!==mes) return false;
+    if(statusSel==='A receber' && r.status!=='a_receber') return false;
+    if(statusSel==='Recebido' && r.status!=='recebido') return false;
+    return true;
+  }).sort(function(a,b){ return a.dueDate-b.dueDate; });
+
+  var bruta = receipts.reduce(function(a,r){return a+r.bruto;},0);
+  var liquida = receipts.reduce(function(a,r){return a+r.liquido;},0);
+  var recebida = receipts.filter(function(r){return r.status==='recebido';}).reduce(function(a,r){return a+r.liquido;},0);
+  document.getElementById('receiptCards').innerHTML = [
+    {l:'Comissão bruta (filtro)', v:money(bruta)},
+    {l:'Comissão líquida (filtro)', v:money(liquida)},
+    {l:'Já recebido líquido', v:money(recebida)},
+    {l:'A receber líquido', v:money(liquida-recebida)}
+  ].map(function(k){ return '<div class="card metric"><div class="label">'+k.l+'</div><div class="value">'+k.v+'</div></div>'; }).join('');
+
+  var body = document.getElementById('receiptBody');
+  if(!receipts.length){ body.innerHTML = '<tr><td colspan="17" class="empty">Nenhum recebimento no período selecionado.</td></tr>'; return; }
+  body.innerHTML = receipts.map(function(r){
+    var recebido = r.status==='recebido';
+    return '<tr><td>'+esc(r.cliente)+'</td><td>'+esc(r.grupo)+'</td><td>'+esc(r.cota)+'</td><td>'+money(r.credito)+'</td><td>'+esc(r.plano)+'</td>'+
+      '<td>'+r.parcela+'</td><td>'+dateBR(r.dueDate)+'</td><td>'+money(r.pct2)+'</td><td>'+money(r.compartilhada)+'</td><td>'+money(r.seguro)+'</td><td>'+money(r.bonificacao)+'</td>'+
+      '<td>'+money(r.bruto)+'</td><td>'+money(r.imposto)+'</td><td>'+money(r.liquido)+'</td><td>'+dateBR(r.dataRecebido)+'</td>'+
+      '<td><span class="badge '+(recebido?'recebido':'novo')+'">'+(recebido?'Recebido':'A receber')+'</span></td>'+
+      '<td><button class="btn sm" onclick="toggleReceipt(\''+r.saleId+'\','+r.parcela+')">'+(recebido?'Desfazer':'Marcar recebido')+'</button></td></tr>';
+  }).join('');
+}
+function toggleReceipt(saleId, parcela){
+  var key = receiptKey(saleId, parcela);
+  var cur = state.receipts[key];
+  if(cur && cur.status==='recebido'){
     delete state.receipts[key];
+    persistReceiptOverride(saleId, parcela, false, null);
+  } else {
+    var dataRecebido = todayISO();
+    state.receipts[key] = { status:'recebido', dataRecebido:dataRecebido };
+    persistReceiptOverride(saleId, parcela, true, dataRecebido);
   }
-  persistReceiptOverride(saleId, parcela, received, dataRecebido);
-  renderRecebimentos(); renderDashboard(); renderVendas();
-  showToast(received ? "Recebimento marcado." : "Recebimento desfeito.");
+  saveLocal();
+  renderReceipts();
+  renderDashboard();
 }
-['receb-search','receb-filter-status','receb-filter-periodo','receb-filter-ano','receb-filter-mes'].forEach(function(id){
-  document.getElementById(id).addEventListener('input', function(){ rPage=1; renderRecebimentos(); });
-  document.getElementById(id).addEventListener('change', function(){ rPage=1; renderRecebimentos(); });
-});
+window.toggleReceipt = toggleReceipt;
 
 /* ============================================================
-   MODAL: NOVA / EDITAR VENDA
+   MODAIS: PROSPECT
 ============================================================ */
-var editingId = null;
-var modalEl = document.getElementById('modal-venda');
-function openVendaModal(id){
-  editingId = id || null;
-  document.getElementById('modal-venda-title').textContent = id ? "Editar venda" : "Nova venda";
-  if(id){
-    var s = state.sales.find(function(x){return x.id===id;});
-    document.getElementById('f-data').value = s.data;
-    document.getElementById('f-cliente').value = s.cliente;
-    document.getElementById('f-tipo').value = s.tipo;
-    document.getElementById('f-credito').value = s.valorCredito;
-    document.getElementById('f-plano').value = s.plano||"";
-    document.getElementById('f-parcelas').value = s.qtdParcelas;
-    document.getElementById('f-grupo').value = s.grupo||"";
-    document.getElementById('f-cota').value = s.cota||"";
-    document.getElementById('f-valorparcela').value = s.valorParcela||"";
-    document.getElementById('f-seguro').value = s.seguroPrestamista||"Não";
-    document.getElementById('f-status').value = s.status;
-  } else {
-    document.getElementById('form-venda').reset();
-    document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
-  }
-  updatePreview();
-  modalEl.classList.add('open');
+var currentProspectId = null;
+function openProspect(id){
+  currentProspectId = id || null;
+  fillAllSelects();
+  var c = id ? clientById(id) : normalizeClient({});
+  document.getElementById('prospectId').value = c.id;
+  document.getElementById('prospectModalTitle').textContent = id ? 'Editar prospect' : 'Novo prospect';
+  document.getElementById('pNome').value = c.nome;
+  document.getElementById('pTel').value = c.telefone;
+  document.getElementById('pEmpresa').value = c.empresa;
+  document.getElementById('pCargo').value = c.cargo;
+  document.getElementById('pOrigem').value = c.origem;
+  document.getElementById('pIndicador').value = c.indicador;
+  document.getElementById('pPrimeiro').value = c.primeiroContato || todayISO();
+  document.getElementById('pForma').value = c.formaContato;
+  document.getElementById('pResultado').value = c.resultadoAbordagem;
+  document.getElementById('pUltimo').value = c.ultimoContato;
+  document.getElementById('pProximaEtapa').value = c.proximaEtapa;
+  document.getElementById('pDataAcao').value = c.dataProximaEtapa;
+  document.getElementById('pObs').value = c.obs;
+  document.getElementById('prospectToLeadBtn').style.display = id ? '' : 'none';
+  openModal('prospectModal');
 }
-function closeVendaModal(){ modalEl.classList.remove('open'); editingId = null; pendingLeadConversion = null; }
-document.getElementById('btn-nova-venda').addEventListener('click', function(){ openVendaModal(null); });
-document.getElementById('btn-nova-venda-top').addEventListener('click', function(){ openVendaModal(null); });
-document.getElementById('modal-venda-close').addEventListener('click', closeVendaModal);
-document.getElementById('modal-venda-cancel').addEventListener('click', closeVendaModal);
-modalEl.addEventListener('click', function(e){ if(e.target===modalEl) closeVendaModal(); });
-
-function updatePreview(){
-  var credito = Number(document.getElementById('f-credito').value)||0;
-  var qtd = Number(document.getElementById('f-parcelas').value)||0;
-  var plano = document.getElementById('f-plano').value;
-  var seguroSim = document.getElementById('f-seguro').value === 'Sim';
-  var range = percent2Range(plano);
-  var total = totalCommission(credito, qtd, plano, seguroSim);
-  var p2 = credito*0.02/range;
-  var seguroVal = (seguroSim && qtd>=14) ? credito*0.0011 : 0;
-  var bonif = qtd>=15 ? credito*0.003 : 0;
-  var compCount = Math.max(qtd-15,0);
-  var comp = compCount>0 ? credito*0.007/compCount : 0;
-  document.getElementById('f-preview-range').textContent = range===15 ? "15ª" : "13ª";
-  document.getElementById('f-preview-total').textContent = money(total);
-  document.getElementById('f-preview-p1').textContent = money(p2);
-  document.getElementById('f-preview-seguro').textContent = money(seguroVal);
-  document.getElementById('f-preview-bonif').textContent = money(bonif);
-  document.getElementById('f-preview-comp').textContent = money(comp);
+window.openProspect = openProspect;
+function saveProspect(ev){
+  ev.preventDefault();
+  var id = document.getElementById('prospectId').value || uid();
+  var existing = clientById(id);
+  var c = normalizeClient(Object.assign({}, existing, {
+    id:id, nome:document.getElementById('pNome').value.trim(), telefone:document.getElementById('pTel').value.trim(),
+    empresa:document.getElementById('pEmpresa').value.trim(), cargo:document.getElementById('pCargo').value.trim(),
+    origem:document.getElementById('pOrigem').value, indicador:document.getElementById('pIndicador').value.trim(),
+    primeiroContato:document.getElementById('pPrimeiro').value, formaContato:document.getElementById('pForma').value,
+    resultadoAbordagem:document.getElementById('pResultado').value, ultimoContato:document.getElementById('pUltimo').value,
+    proximaEtapa:document.getElementById('pProximaEtapa').value, dataProximaEtapa:document.getElementById('pDataAcao').value,
+    obs:document.getElementById('pObs').value, stage: existing ? existing.stage : 'prospect',
+    history: existing ? existing.history : []
+  }));
+  upsertClient(c);
+  closeModal('prospectModal');
+  showToast('Prospect salvo.');
+  renderAll();
 }
-['f-credito','f-parcelas','f-plano','f-seguro'].forEach(function(id){
-  document.getElementById(id).addEventListener('input', updatePreview);
-  document.getElementById(id).addEventListener('change', updatePreview);
-});
-
-document.getElementById('modal-venda-save').addEventListener('click', function(){
-  var data = document.getElementById('f-data').value;
-  var cliente = document.getElementById('f-cliente').value.trim();
-  var credito = Number(document.getElementById('f-credito').value);
-  var qtd = Number(document.getElementById('f-parcelas').value);
-  var plano = document.getElementById('f-plano').value;
-  if(!data || !cliente || !credito || !qtd){
-    showToast("Preencha data, cliente, crédito e parcelas.");
-    return;
-  }
-  if(!plano){
-    showToast("Selecione o plano da venda.");
-    return;
-  }
-  var payload = {
-    data: data, cliente: cliente,
-    tipo: document.getElementById('f-tipo').value,
-    valorCredito: credito,
-    plano: plano,
-    qtdParcelas: qtd,
-    grupo: document.getElementById('f-grupo').value.trim(),
-    cota: document.getElementById('f-cota').value.trim(),
-    valorParcela: Number(document.getElementById('f-valorparcela').value)||0,
-    seguroPrestamista: document.getElementById('f-seguro').value,
-    status: document.getElementById('f-status').value
-  };
-  if(editingId){
-    var idx = state.sales.findIndex(function(s){return s.id===editingId;});
-    state.sales[idx] = Object.assign(state.sales[idx], payload);
-    persistSale(state.sales[idx]);
-    showToast("Venda atualizada.");
-  } else {
-    payload.id = uid();
-    state.sales.push(payload);
-    persistSale(payload);
-    if(pendingLeadConversion){
-      var lead = state.leads.find(function(l){return l.id===pendingLeadConversion;});
-      if(lead){
-        lead.status = 'Convertido';
-        lead.saleId = payload.id;
-        persistLead(lead);
-      }
-      pendingLeadConversion = null;
-      showToast("Venda cadastrada e lead convertido! 🎉");
-    } else {
-      showToast("Venda cadastrada.");
-    }
-  }
-  closeVendaModal();
-  renderVendas(); renderDashboard(); renderRecebimentos(); renderLeads();
-});
+window.saveProspect = saveProspect;
+function virarLead(){
+  var c = clientById(document.getElementById('prospectId').value);
+  if(!c) return;
+  c.stage = 'lead';
+  if(!c.ultimoContato) c.ultimoContato = todayISO();
+  upsertClient(c);
+  closeModal('prospectModal');
+  showToast('Prospect convertido em Lead.');
+  setView('leads');
+  openLead(c.id);
+}
+window.virarLead = virarLead;
 
 /* ============================================================
-   IMPOSTO GLOBAL
+   MODAIS: LEAD
 ============================================================ */
-var impostoInput = document.getElementById('input-imposto');
-impostoInput.addEventListener('change', function(){
-  var v = Number(impostoInput.value);
-  if(isNaN(v) || v<0) v = 0;
-  state.impostoPct = v;
+var currentLeadId = null;
+window.currentLeadId = null;
+function updatePipelineTrack(c){
+  var steps = ['Prospect','Lead','Carteira'];
+  var activeIdx = c.stage==='carteira' ? 2 : (c.stage==='lead' ? 1 : 0);
+  document.getElementById('leadPipelineTrack').innerHTML = steps.map(function(s,i){
+    return '<span class="pt-step'+(i<=activeIdx?' on':'')+'">'+s+'</span>' + (i<steps.length-1 ? '<span class="pt-arrow">→</span>' : '');
+  }).join('');
+}
+function renderTimeline(c){
+  var list = (c.history||[]).slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); });
+  var el = document.getElementById('leadTimeline');
+  el.innerHTML = list.length ? list.map(function(h){
+    return '<div class="timeline-item"><div class="meta"><b>'+dateBR(h.data)+' — '+esc(h.tipo)+'</b><span>'+esc(h.proximoPasso||'')+'</span></div>'+
+      (h.resultado ? '<p><b>'+esc(h.resultado)+'</b></p>' : '') + (h.obs ? '<p>'+esc(h.obs)+'</p>' : '') +
+      (h.dataProximoPasso ? '<p class="tiny">Próximo passo: '+dateBR(h.dataProximoPasso)+'</p>' : '') + '</div>';
+  }).join('') : '<div class="timeline-empty">Nenhum contato registrado ainda.</div>';
+}
+function openLead(id){
+  currentLeadId = id; window.currentLeadId = id;
+  fillAllSelects();
+  var c = clientById(id);
+  if(!c) return;
+  document.getElementById('leadId').value = c.id;
+  document.getElementById('leadModalTitle').textContent = c.nome;
+  document.getElementById('leadModalSub').textContent = c.stage==='carteira' ? 'Cliente na carteira' : (c.statusLead==='Perdido' ? 'Oportunidade perdida' : 'Oportunidade ativa');
+  document.getElementById('lNome').value = c.nome;
+  document.getElementById('lTel').value = c.telefone;
+  document.getElementById('lEmail').value = c.email;
+  document.getElementById('lEmpresa').value = c.empresa;
+  document.getElementById('lCargo').value = c.cargo;
+  document.getElementById('lIndicador').value = c.indicador;
+  document.getElementById('lOrigem').value = c.origem;
+  document.getElementById('lTemperatura').value = c.temperatura;
+  document.getElementById('lInteresse').value = c.interesse;
+  document.getElementById('lObjetivo').value = c.objetivo;
+  document.getElementById('lFaixaCredito').value = c.faixaCredito;
+  document.getElementById('lCreditoPretendido').value = c.creditoPretendido || '';
+  document.getElementById('lParcela').value = c.parcelaEstimada || '';
+  document.getElementById('lEstrategia').value = c.estrategia;
+  document.getElementById('lCondicao').value = c.condicao;
+  document.getElementById('lStatusLead').value = c.statusLead;
+  document.getElementById('lMotivo').value = c.motivoPerda || '';
+  document.getElementById('lMotivoWrap').style.display = c.statusLead==='Perdido' ? '' : 'none';
+  document.getElementById('lUltimo').value = c.ultimoContato;
+  document.getElementById('lProximaEtapa').value = c.proximaEtapa;
+  document.getElementById('lDataAcao').value = c.dataProximaEtapa;
+  document.getElementById('lObs').value = c.obs;
+  document.getElementById('leadExtraActions').style.display = '';
+  document.getElementById('leadReabrirBtn').style.display = c.statusLead==='Perdido' ? '' : 'none';
+  document.getElementById('leadVendaBtn').style.display = c.stage==='carteira' ? 'none' : '';
+  updatePipelineTrack(c);
+  renderTimeline(c);
+  openModal('leadModal');
+}
+window.openLead = openLead;
+document.getElementById('lStatusLead').addEventListener('change', function(){
+  document.getElementById('lMotivoWrap').style.display = this.value==='Perdido' ? '' : 'none';
+});
+function saveLead(ev){
+  ev.preventDefault();
+  var id = document.getElementById('leadId').value;
+  var existing = clientById(id);
+  if(!existing) return;
+  var statusLead = document.getElementById('lStatusLead').value;
+  var c = Object.assign({}, existing, {
+    nome:document.getElementById('lNome').value.trim(), telefone:document.getElementById('lTel').value.trim(),
+    email:document.getElementById('lEmail').value.trim(), empresa:document.getElementById('lEmpresa').value.trim(),
+    cargo:document.getElementById('lCargo').value.trim(), indicador:document.getElementById('lIndicador').value.trim(),
+    origem:document.getElementById('lOrigem').value, temperatura:document.getElementById('lTemperatura').value,
+    interesse:document.getElementById('lInteresse').value, objetivo:document.getElementById('lObjetivo').value.trim(),
+    faixaCredito:document.getElementById('lFaixaCredito').value, creditoPretendido:Number(document.getElementById('lCreditoPretendido').value)||0,
+    parcelaEstimada:Number(document.getElementById('lParcela').value)||0, estrategia:document.getElementById('lEstrategia').value.trim(),
+    condicao:document.getElementById('lCondicao').value.trim(), statusLead:statusLead,
+    motivoPerda: statusLead==='Perdido' ? document.getElementById('lMotivo').value : '',
+    ultimoContato:document.getElementById('lUltimo').value, proximaEtapa:document.getElementById('lProximaEtapa').value,
+    dataProximaEtapa:document.getElementById('lDataAcao').value, obs:document.getElementById('lObs').value
+  });
+  upsertClient(c);
+  closeModal('leadModal');
+  showToast('Lead salvo.');
+  renderAll();
+}
+window.saveLead = saveLead;
+function reabrirOportunidade(){
+  var c = clientById(document.getElementById('leadId').value);
+  if(!c) return;
+  c.statusLead = 'Ativo';
+  c.motivoPerda = '';
+  upsertClient(c);
+  showToast('Oportunidade reaberta.');
+  openLead(c.id);
+}
+window.reabrirOportunidade = reabrirOportunidade;
+
+/* ============================================================
+   MODAL: REGISTRAR CONTATO (histórico)
+============================================================ */
+function openContato(){
+  fillAllSelects();
+  document.getElementById('cData').value = todayISO();
+  document.getElementById('cTipo').value = 'WhatsApp';
+  document.getElementById('cResultado').value = '';
+  document.getElementById('cObs').value = '';
+  document.getElementById('cProximoPasso').value = '';
+  document.getElementById('cDataProximoPasso').value = '';
+  openModal('contatoModal');
+}
+window.openContato = openContato;
+function saveContato(ev){
+  ev.preventDefault();
+  var c = clientById(currentLeadId || document.getElementById('leadId').value);
+  if(!c) return;
+  var entry = { id:uid(), data:document.getElementById('cData').value, tipo:document.getElementById('cTipo').value,
+    resultado:document.getElementById('cResultado').value.trim(), obs:document.getElementById('cObs').value.trim(),
+    proximoPasso:document.getElementById('cProximoPasso').value, dataProximoPasso:document.getElementById('cDataProximoPasso').value };
+  c.history = (c.history||[]).concat([entry]);
+  c.ultimoContato = entry.data;
+  if(entry.proximoPasso) c.proximaEtapa = entry.proximoPasso;
+  if(entry.dataProximoPasso) c.dataProximaEtapa = entry.dataProximoPasso;
+  upsertClient(c);
+  closeModal('contatoModal');
+  showToast('Contato registrado.');
+  renderTimeline(c);
+  renderAll();
+}
+window.saveContato = saveContato;
+
+/* ============================================================
+   MODAL: REGISTRAR VENDA (dentro do Lead ou standalone)
+============================================================ */
+var saleFromLeadId = null;
+function openVendaModal(leadId){
+  saleFromLeadId = leadId || null;
+  var c = leadId ? clientById(leadId) : null;
+  document.getElementById('saleId').value = uid();
+  document.getElementById('saleLeadId').value = leadId || '';
+  var box = document.getElementById('saleClientBox');
+  var wraps = ['sClienteWrap','sTelWrap','sEmailWrap'];
+  if(c){
+    box.style.display='';
+    document.getElementById('saleClientName').textContent = c.nome;
+    wraps.forEach(function(w){ document.getElementById(w).style.display='none'; });
+    document.getElementById('sCliente').value = c.nome;
+    document.getElementById('sTel').value = c.telefone;
+    document.getElementById('sEmail').value = c.email;
+    document.getElementById('sCredito').value = c.creditoPretendido || '';
+    document.getElementById('sParcela').value = c.parcelaEstimada || '';
+  } else {
+    box.style.display='none';
+    wraps.forEach(function(w){ document.getElementById(w).style.display=''; });
+    document.getElementById('sCliente').value='';
+    document.getElementById('sTel').value='';
+    document.getElementById('sEmail').value='';
+    document.getElementById('sCredito').value='';
+    document.getElementById('sParcela').value='';
+  }
+  document.getElementById('sNumero').value = '';
+  document.getElementById('sData').value = todayISO();
+  document.getElementById('sTipo').value = 'Outro';
+  document.getElementById('sPlano').value = '100%';
+  document.getElementById('sQtd').value = 220;
+  document.getElementById('sGrupo').value = '';
+  document.getElementById('sCota').value = '';
+  document.getElementById('sFormaPagamento').value = 'Boleto';
+  document.getElementById('sSeguro').value = 'Não';
+  document.getElementById('sStatus').value = 'Emitida';
+  document.getElementById('sPos').value = '';
+  openModal('saleModal');
+}
+window.openVendaModal = openVendaModal;
+function saveSale(ev){
+  ev.preventDefault();
+  var leadId = document.getElementById('saleLeadId').value || null;
+  var clientObj = leadId ? clientById(leadId) : null;
+  var sale = normalizeSale({
+    id: document.getElementById('saleId').value || uid(),
+    clientId: leadId || null,
+    numero: document.getElementById('sNumero').value.trim(),
+    data: document.getElementById('sData').value,
+    cliente: clientObj ? clientObj.nome : document.getElementById('sCliente').value.trim(),
+    telefone: clientObj ? clientObj.telefone : document.getElementById('sTel').value.trim(),
+    email: clientObj ? clientObj.email : document.getElementById('sEmail').value.trim(),
+    tipo: document.getElementById('sTipo').value,
+    credito: Number(document.getElementById('sCredito').value)||0,
+    plano: document.getElementById('sPlano').value,
+    qtd: Number(document.getElementById('sQtd').value)||220,
+    grupo: document.getElementById('sGrupo').value.trim(),
+    cota: document.getElementById('sCota').value.trim(),
+    parcela: Number(document.getElementById('sParcela').value)||0,
+    formaPagamento: document.getElementById('sFormaPagamento').value,
+    seguro: document.getElementById('sSeguro').value,
+    status: document.getElementById('sStatus').value,
+    pos: document.getElementById('sPos').value.trim()
+  });
+  state.sales.push(sale);
+  persistSale(sale);
+  saveLocal();
+
+  if(clientObj){
+    clientObj.stage = 'carteira';
+    clientObj.history = (clientObj.history||[]).concat([{ id:uid(), data:sale.data, tipo:'Venda', resultado:'Venda registrada',
+      obs:'Venda nº '+sale.numero+' — '+money(sale.credito), proximoPasso:'Pós-venda', dataProximoPasso:'' }]);
+    upsertClient(clientObj);
+  }
+
+  closeModal('saleModal');
+  closeModal('leadModal');
+  showToast('Venda registrada e cronograma gerado.');
+  renderAll();
+}
+window.saveSale = saveSale;
+function deleteSale(id){
+  if(!confirm('Excluir esta venda? Os recebimentos vinculados também serão removidos.')) return;
+  state.sales = state.sales.filter(function(s){ return s.id!==id; });
+  Object.keys(state.receipts).forEach(function(k){ if(k.indexOf(id+'_')===0) delete state.receipts[k]; });
+  if(dbReady){ sb.from('sales').delete().eq('id',id).then(function(res){ if(res.error) console.warn(res.error); }); }
+  saveLocal();
+  renderAll();
+}
+window.deleteSale = deleteSale;
+
+/* ============================================================
+   CLIENTES: upsert/delete comum
+============================================================ */
+function upsertClient(c){
+  var idx = state.clients.findIndex(function(x){ return x.id===c.id; });
+  if(idx>-1) state.clients[idx] = c; else state.clients.push(c);
+  persistClient(c);
+  saveLocal();
+}
+function deleteClient(id){
+  if(!confirm('Excluir este registro?')) return;
+  state.clients = state.clients.filter(function(c){ return c.id!==id; });
+  persistDeleteClient(id);
+  saveLocal();
+  renderAll();
+}
+window.deleteClient = deleteClient;
+
+/* ============================================================
+   MODAIS GENÉRICOS
+============================================================ */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+window.closeModal = closeModal;
+
+/* ============================================================
+   CONFIGURAÇÕES / EXPORT / IMPORT
+============================================================ */
+function renderConfig(){
+  document.getElementById('taxInput').value = state.impostoPct;
+  document.getElementById('adminInput').value = state.admin;
+}
+function saveSettings(){
+  state.impostoPct = Number(document.getElementById('taxInput').value)||0;
+  state.admin = document.getElementById('adminInput').value.trim();
   persistSettings();
-  renderDashboard(); renderRecebimentos(); renderVendas();
-});
-
-/* ============================================================
-   LIMPAR TUDO
-============================================================ */
-document.getElementById('btn-clear-all').addEventListener('click', function(){
-  if(!confirm("Isso vai apagar todas as vendas, recebimentos e leads salvos. Continuar?")) return;
-  var oldSales = state.sales;
-  var oldLeads = state.leads;
-  state = { sales: [], receipts: {}, impostoPct: state.impostoPct, leads: [] };
-  if(dbReady){
-    oldSales.forEach(function(s){
-      sb.from('sales').delete().eq('id', s.id).then(function(res){ if(res.error) console.warn(res.error); });
-    });
-    oldLeads.forEach(function(l){
-      sb.from('leads').delete().eq('id', l.id).then(function(res){ if(res.error) console.warn(res.error); });
-    });
-  } else {
-    saveLocal();
-  }
-  renderDashboard(); renderLeads(); renderVendas(); renderRecebimentos();
-  showToast("Todos os dados foram apagados.");
-});
-
-/* ============================================================
-   SEED (only if nothing saved yet) — demonstrates and validates the rule
-============================================================ */
-function seedIfEmpty(){
-  if(state.sales.length>0) return;
-  var s1 = {
-    id: uid(), data:"2026-01-15", cliente:"Cliente exemplo (validação)", tipo:"Imóvel",
-    valorCredito:4000000, plano:"100%", qtdParcelas:200, grupo:"1234", cota:"056",
-    valorParcela:20000, seguroPrestamista:"Sim", status:"Em andamento"
-  };
-  var s2 = {
-    id: uid(), data:"2026-03-01", cliente:"João da Silva", tipo:"Veículo",
-    valorCredito:100000, plano:"55%", qtdParcelas:60, grupo:"5678", cota:"012",
-    valorParcela:1800, seguroPrestamista:"Não", status:"Em andamento"
-  };
-  state.sales.push(s1, s2);
-  state.receipts[receiptKey(s1.id,1)] = {status:'recebido', dataRecebido:"2026-02-15"};
-  state.receipts[receiptKey(s1.id,2)] = {status:'recebido', dataRecebido:"2026-03-15"};
-  persistSale(s1); persistSale(s2);
-  persistReceiptOverride(s1.id, 1, true, "2026-02-15");
-  persistReceiptOverride(s1.id, 2, true, "2026-03-15");
-
-  if(state.leads.length===0){
-    var l1 = {
-      id: uid(), nome:"Maria exemplo (lead)", telefone:"(11) 90000-0000", email:"",
-      origem:"Indicação", tipoInteresse:"Imóvel", valorEstimado:300000, status:"Contato iniciado",
-      proximoFollowup: new Date().toISOString().slice(0,10), observacoes:"Interessada, pediu simulação.", saleId:null
-    };
-    state.leads.push(l1);
-    persistLead(l1);
-  }
+  saveLocal();
+  showToast('Configurações salvas.');
+  renderAll();
 }
+window.saveSettings = saveSettings;
+function exportData(){
+  var blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'crm-isabella-backup-'+todayISO()+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+window.exportData = exportData;
+function importData(ev){
+  var file = ev.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(reader.result);
+      if(data.clients) state.clients = data.clients.map(normalizeClient);
+      if(data.sales) state.sales = data.sales.map(normalizeSale);
+      if(data.receipts) state.receipts = data.receipts;
+      if(typeof data.impostoPct==='number') state.impostoPct = data.impostoPct;
+      if(data.admin) state.admin = data.admin;
+      saveLocal();
+      if(dbReady){
+        state.clients.forEach(persistClient);
+        state.sales.forEach(persistSale);
+        persistSettings();
+        showToast('Backup importado e enviado para o Supabase.');
+      } else {
+        showToast('Backup importado (salvo neste navegador).');
+      }
+      renderAll();
+    }catch(e){ console.warn(e); showToast('Arquivo inválido.'); }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
+window.importData = importData;
 
 /* ============================================================
-   SETUP GATE — mostra instrucoes se as credenciais nao foram preenchidas
+   RENDER ALL
 ============================================================ */
-function showSetupGate(){
-  var el = document.createElement('div');
-  el.style.cssText = "position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;";
-  el.innerHTML =
-    '<div style="max-width:560px;background:var(--bg-elevated);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:var(--shadow);">'+
-    '<h2 style="font-family:var(--font-serif);margin:0 0 10px;font-size:20px;">Falta configurar o Supabase</h2>'+
-    '<p style="color:var(--ink-soft);font-size:14px;line-height:1.6;margin:0 0 14px;">Edite o arquivo <code>index.html</code> e preencha as constantes '+
-    '<code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> no topo do bloco <code>&lt;script&gt;</code> com os dados do seu projeto Supabase. '+
-    'Veja o passo a passo completo em <code>README.md</code>.</p>'+
-    '<p style="color:var(--ink-faint);font-size:13px;line-height:1.6;margin:0;">Até lá, o app funciona em modo local (dados só neste navegador) para você conferir o funcionamento.</p>'+
-    '<button id="setup-gate-dismiss" class="btn btn-primary" style="margin-top:16px;">Continuar em modo local</button>'+
-    '</div>';
-  document.body.appendChild(el);
-  document.getElementById('setup-gate-dismiss').addEventListener('click', function(){ el.remove(); });
+function renderAll(){
+  renderDashboard();
+  renderProspects();
+  renderLeads();
+  renderLost();
+  renderFollowup();
+  renderWallet();
+  renderReceipts();
+  renderConfig();
 }
+window.renderDashboard = renderDashboard;
+window.renderMonthly = renderMonthly;
+window.renderProspects = renderProspects;
+window.renderLeads = renderLeads;
+window.renderWallet = renderWallet;
+window.renderReceipts = renderReceipts;
 
 /* ============================================================
    INIT
 ============================================================ */
 async function init(){
-  if(isConfigured() && window.supabase && typeof window.supabase.createClient === 'function'){
+  loadLocal();
+  if(isConfigured() && window.supabase){
     try{
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       await loadFromDb();
       dbReady = true;
       setSyncBadge('cloud');
-      subscribeRealtime();
+      sb.channel('public:all-changes')
+        .on('postgres_changes', {event:'*', schema:'public'}, function(){ loadFromDb().then(renderAll); })
+        .subscribe();
     }catch(e){
-      console.warn("Falha ao carregar do Supabase, usando armazenamento local.", e);
+      console.warn('Falha ao conectar Supabase, usando localStorage.', e);
       dbReady = false;
-      loadLocal();
       setSyncBadge('local');
     }
   } else {
-    dbReady = false;
-    loadLocal();
     setSyncBadge('local');
-    showSetupGate();
   }
-
-  impostoInput.value = state.impostoPct;
-  seedIfEmpty();
-  renderDashboard();
-  renderLeads();
-  renderVendas();
-  renderRecebimentos();
+  fillAllSelects();
+  renderAll();
 }
-
-/* Sincronizacao em tempo real: quando outra pessoa (ex: sua namorada) altera
-   os dados em outro dispositivo, esta aba recarrega e re-renderiza sozinha. */
-var realtimeTimer = null;
-function subscribeRealtime(){
-  function scheduleReload(){
-    clearTimeout(realtimeTimer);
-    realtimeTimer = setTimeout(async function(){
-      try{
-        await loadFromDb();
-        renderDashboard(); renderLeads(); renderVendas(); renderRecebimentos();
-      }catch(e){ console.warn(e); }
-    }, 400);
-  }
-  sb.channel('consorcio-sync')
-    .on('postgres_changes', {event:'*', schema:'public', table:'sales'}, scheduleReload)
-    .on('postgres_changes', {event:'*', schema:'public', table:'receipt_overrides'}, scheduleReload)
-    .on('postgres_changes', {event:'*', schema:'public', table:'settings'}, scheduleReload)
-    .on('postgres_changes', {event:'*', schema:'public', table:'leads'}, scheduleReload)
-    .subscribe();
-}
-
 init();
 
 })();
+
 </script>
 </body>
 </html>
